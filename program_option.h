@@ -60,7 +60,7 @@ namespace lulib {
 				class bad_as : public std::bad_cast {
 				public:
 					virtual const char * what() const throw() {
-						return "mylib::program_option: failed conversion using as<>";
+						return "lulib::program_option: failed conversion using as<>";
 					}
 				};
 				template<typename T>
@@ -168,7 +168,7 @@ namespace lulib {
 			// 指定した名前のコマンドライン引数を有効（受け付けるよう）にする
 			// push_back()を持つなら
 			template<typename T>
-			void enable(const std::string& key_str, char key_ch, const std::string& descript, typename boost::enable_if< mylib::has_push_back<T> >::type* = 0) {
+			void enable(const std::string& key_str, char key_ch, const std::string& descript, typename boost::enable_if< type_traits::has_push_back<T> >::type* = 0) {
 				result_type res = c_.insert( std::make_pair(key_str, value_type()) );
 
 				// 挿入に失敗（すでに指定されていたら）
@@ -197,7 +197,7 @@ namespace lulib {
 			}
 			// push_back()を持たないなら
 			template<typename T>
-			void enable(const std::string& key_str, char key_ch, const std::string& descript, typename boost::disable_if< mylib::has_push_back<T> >::type* = 0) {
+			void enable(const std::string& key_str, char key_ch, const std::string& descript, typename boost::disable_if< type_traits::has_push_back<T> >::type* = 0) {
 				result_type res = c_.insert( std::make_pair(key_str, value_type()) );
 
 				// 挿入に失敗（すでに指定されていたら）
