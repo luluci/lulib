@@ -45,12 +45,12 @@ namespace lulib {
 			}
 
 			bool open() {
-				valid_read_ = valid_write_ = ( ::pipe(fd_) == 0 );  // pipeì¬
+				valid_read_ = valid_write_ = ( ::pipe(fd_) == 0 );  // pipeä½œæˆ
 				return valid_read_;
 			}
-			// è“®close
+			// æ‰‹å‹•close
 			void close() {
-				// pipe‚ğ•Â‚¶‚é
+				// pipeã‚’é–‰ã˜ã‚‹
 				close_read();
 				close_write();
 			}
@@ -111,7 +111,7 @@ namespace lulib {
 			}
 		}
 
-		// è“®close
+		// æ‰‹å‹•close
 		void close() {
 			pfd_p2c_.close();
 			pfd_c2p_.close();
@@ -119,51 +119,51 @@ namespace lulib {
 			::dup2(org_fd_stdin_, 0);
 			::dup2(org_fd_stdout_, 1);
 
-			// qƒvƒƒZƒX‚ÌI—¹‚ğ‘Ò‚Â
+			// å­ãƒ—ãƒ­ã‚»ã‚¹ã®çµ‚äº†ã‚’å¾…ã¤
 			wait_pid();
 		}
-		// è“®open
+		// æ‰‹å‹•open
 		bool open(char const* command) {
 			if (pfd_p2c_ || pfd_c2p_) {
-				// 2dopen‚ÍƒGƒ‰[
+				// 2é‡openã¯ã‚¨ãƒ©ãƒ¼
 				return false;
 			}
 
-			// ƒpƒCƒvì¬
+			// ãƒ‘ã‚¤ãƒ—ä½œæˆ
 			pfd_p2c_.open();
 			if (!pfd_p2c_) return false;
 			pfd_c2p_.open();
 			if (!pfd_c2p_) return false;
 
-			// ƒfƒtƒHƒ‹ƒg‚Ìƒtƒ@ƒCƒ‹ƒfƒBƒXƒNƒŠƒvƒ^‚ğ‹L‰¯‚µ‚Ä‚¨‚­
+			// ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚¿ã‚’è¨˜æ†¶ã—ã¦ãŠã
 			org_fd_stdin_  = ::dup( 0 );
 			org_fd_stdout_ = ::dup( 1 );
 
-			// invoke process: ©•ª‚Ì•¡»‚ğì¬
+			// invoke process: è‡ªåˆ†ã®è¤‡è£½ã‚’ä½œæˆ
 			child_pid_ = ::fork();
-			// pid‚ª•‰”‚¾‚Æ¸”s
+			// pidãŒè² æ•°ã ã¨å¤±æ•—
 			if (child_pid_ < 0) return false;
 
-			// pid‚ª0‚¾‚ÆA©•ª‚Í•¡»‚³‚ê‚½qƒvƒƒZƒX
-			// qƒvƒƒZƒX‚ª’S“–‚·‚éˆ—
+			// pidãŒ0ã ã¨ã€è‡ªåˆ†ã¯è¤‡è£½ã•ã‚ŒãŸå­ãƒ—ãƒ­ã‚»ã‚¹
+			// å­ãƒ—ãƒ­ã‚»ã‚¹ãŒæ‹…å½“ã™ã‚‹å‡¦ç†
 			if (child_pid_ == 0) {
-				// eƒvƒƒZƒX‚ª‹­§“I‚ÉŒ³‚É–ß‚·‚Ì‚ÅƒGƒ‰[ƒ`ƒFƒbƒN‚Í‚µ‚È‚¢
-				// •W€“ü—Í‚ğƒpƒCƒv‚ÉØ‚è‘Ö‚¦‚é
+				// è¦ªãƒ—ãƒ­ã‚»ã‚¹ãŒå¼·åˆ¶çš„ã«å…ƒã«æˆ»ã™ã®ã§ã‚¨ãƒ©ãƒ¼ãƒã‚§ãƒƒã‚¯ã¯ã—ãªã„
+				// æ¨™æº–å…¥åŠ›ã‚’ãƒ‘ã‚¤ãƒ—ã«åˆ‡ã‚Šæ›¿ãˆã‚‹
 				::dup2(pfd_p2c_.read(), 0);
-				// •W€o—Í‚ğƒpƒCƒv‚ÉØ‚è‘Ö‚¦‚é
+				// æ¨™æº–å‡ºåŠ›ã‚’ãƒ‘ã‚¤ãƒ—ã«åˆ‡ã‚Šæ›¿ãˆã‚‹
 				::dup2(pfd_c2p_.write(), 1);
 
-				// ƒpƒCƒv‚Í‚à‚¤•Â‚¶‚é
+				// ãƒ‘ã‚¤ãƒ—ã¯ã‚‚ã†é–‰ã˜ã‚‹
 				pfd_p2c_.close();
 				pfd_c2p_.close();
 
-				// ƒRƒ}ƒ“ƒh‚ğÀs
-				// execlp‚ÍÀs‚É¬Œ÷‚µ‚½‚ç•Ô‚Á‚Ä‚±‚È‚¢
-				// ¸”s‚µ‚½‚çè“®‚Å©E
+				// ã‚³ãƒãƒ³ãƒ‰ã‚’å®Ÿè¡Œ
+				// execlpã¯å®Ÿè¡Œã«æˆåŠŸã—ãŸã‚‰è¿”ã£ã¦ã“ãªã„
+				// å¤±æ•—ã—ãŸã‚‰æ‰‹å‹•ã§è‡ªæ®º
 				if ( ::execlp( "sh", "sh", "-c", command, NULL) < 0) exit(EXIT_FAILURE);
 
 			}
-			// pid‚ª0‚æ‚è‘å‚«‚¢‚ÆA©•ª‚ÍeƒvƒƒZƒX‚ÅApid‚ÍqƒvƒƒZƒX‚Ìpid
+			// pidãŒ0ã‚ˆã‚Šå¤§ãã„ã¨ã€è‡ªåˆ†ã¯è¦ªãƒ—ãƒ­ã‚»ã‚¹ã§ã€pidã¯å­ãƒ—ãƒ­ã‚»ã‚¹ã®pid
 		}
 
 		// c style
@@ -195,7 +195,7 @@ namespace lulib {
 
 			pfd_c2p_.close_read();
 
-			// qƒvƒƒZƒX‚ÌI—¹‚ğ‘Ò‚Â
+			// å­ãƒ—ãƒ­ã‚»ã‚¹ã®çµ‚äº†ã‚’å¾…ã¤
 			wait_pid();
 
 			return str;
@@ -204,7 +204,7 @@ namespace lulib {
 	private:
 		bool valid_;
 		pipe_fd pfd_p2c_, pfd_c2p_;
-		int org_fd_stdin_, org_fd_stdout_;  // ƒfƒtƒHƒ‹ƒg‚Ìƒtƒ@ƒCƒ‹ƒfƒBƒXƒNƒŠƒvƒVƒ‡ƒ“
+		int org_fd_stdin_, org_fd_stdout_;  // ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‡ã‚£ã‚¹ã‚¯ãƒªãƒ—ã‚·ãƒ§ãƒ³
 		int child_pid_;
 	};
 
