@@ -17,19 +17,19 @@ std::cout << "prepare:" << ret << std::endl;
 if (!ret) return 1;
 
 ret = db.bind(1, "name1", "place1");
-ret = db.step() == mylib::sqlite3::result_code::done;
+ret = db.step() == lulib::sqlite3::result_code::done;
 std::cout << "step:" << ret << std::endl;
 if (!ret) return 1;
 
 ret = db.bind(2, "name2", "place2");
-ret = db.step() == mylib::sqlite3::result_code::done;
+ret = db.step() == lulib::sqlite3::result_code::done;
 
 ret = db.bind(3, "name3", "place3");
-ret = db.step() == mylib::sqlite3::result_code::done;
+ret = db.step() == lulib::sqlite3::result_code::done;
 
 // 読み出し
 db.execute("SELECT * FROM my_table WHERE id=?", 2).each_row(
-	[](const mylib::sqlite3::row& row) -> bool {
+	[](const lulib::sqlite3::row& row) -> bool {
 		std::cout << "row:" << std::endl;
 		std::cout << "  id   :" << *row.as_int(0) << std::endl;
 		std::cout << "  name :" << *row.as_text(1) << std::endl;
