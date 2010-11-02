@@ -41,11 +41,13 @@ db.execute("SELECT * FROM my_table WHERE id=?", 2).each_row(
 
 */
 
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 #include <string>
 #include <memory>
 #include <functional>
-#include <iostream>
 
 #include <sqlite3.h>
 
@@ -112,6 +114,17 @@ namespace lulib {
 			};
 		};
 
+		// SQLite3 data type
+		struct data_type {
+			enum enum_t {
+				integer = SQLITE_INTEGER,  // int
+				float_  = SQLITE_FLOAT,    // double
+				text    = SQLITE_TEXT,     // char*
+				blob    = SQLITE_BLOB,     // void*
+				null    = SQLITE_NULL,     // null
+			};
+		};
+
 	public:
 		// row proxy class
 		// step()を実行したとき、proxyクラスとして返す行クラス
@@ -131,6 +144,10 @@ namespace lulib {
 
 			inline operator bool() const { return stmt_ != 0; }
 
+			inline int type(int col) const {
+				return ::sqlite3_column_type(stmt_, col);
+			}
+
 			// optional typedef
 			typedef boost::optional<const char*> optional_char;
 			typedef boost::optional<std::string> optional_str;
@@ -139,22 +156,22 @@ namespace lulib {
 
 			// char* specialize
 			optional_char as_text(int col) const {
-				if (col >= column_size_) return optional_char();
+				if (col >= column_size_ || type(col) == data_type::null) return optional_char();
 				return optional_char( (const char*)::sqlite3_column_text(stmt_, col) );
 			}
 			// std::string specialize
 			optional_str as_string(int col) const {
-				if (col >= column_size_) return optional_str();
-				return optional_str( std::string( (const char*)::sqlite3_column_text(stmt_, col) ) );
+				if (col >= column_size_ || type(col) == data_type::null) return optional_str();
+				return optional_str( std::string( (char const*)::sqlite3_column_text(stmt_, col) ) );
 			}
 			// int specialize
 			optional_int as_int(int col) const {
-				if (col >= column_size_) return optional_int();
+				if (col >= column_size_ || type(col) == data_type::null) return optional_int();
 				return optional_int( ::sqlite3_column_int(stmt_, col) );
 			}
 			// double specialize
 			optional_double as_double(int col) const {
-				if (col >= column_size_) return optional_double();
+				if (col >= column_size_ || type(col) == data_type::null) return optional_double();
 				return optional_double( ::sqlite3_column_double(stmt_, col) );
 			}
 			/*
