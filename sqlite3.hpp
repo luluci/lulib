@@ -142,8 +142,14 @@ namespace lulib {
 				column_size_ = ::sqlite3_column_count(stmt_);
 			}
 
+			// rowが有効か否か
 			inline operator bool() const { return stmt_ != 0; }
 
+			// rowが持つ行数
+			inline int col_size() const {
+				return column_size_;
+			}
+			// col列のデータ型
 			inline int type(int col) const {
 				return ::sqlite3_column_type(stmt_, col);
 			}
