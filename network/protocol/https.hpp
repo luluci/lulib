@@ -80,6 +80,68 @@ namespace lulib {
 				}
 
 				socket_type& socket() { return socket_; }
+				
+				// async
+				// GET
+				inline bool operator()(
+					// 引数
+					std::string      const& host,         // host(domain)
+					std::string      const& file,         // file
+					header_container const& headers,  // http header
+					std::string      const& option,       // option data
+					// 返り値
+					unsigned int& status_code,  // response status code
+					std::string& header,        // response header
+					std::string& body,          // response body
+					// タイムアウトまでの時間
+					int timeout,
+					// メソッド
+					typename method::GET
+				) {
+					// フラグ初期化
+					stopped_ = false;
+					// request作成
+					boost::asio::streambuf request;
+					make_request::http_get(request, host, file, headers);
+					// 処理開始
+					run_impl(host, "https", request, status_code, header, body, timeout);
+					// この時点でstopしてなければ正常終了
+					bool result = !stopped_;
+					// readまで終わったのでstop
+					async_failure();
+
+					return result;
+				}
+				// POST
+				inline bool operator()(
+					// 引数
+					std::string      const& host,         // host(domain)
+					std::string      const& file,         // file
+					header_container const& headers,  // http header
+					std::string      const& option,       // option data
+					// 返り値
+					unsigned int& status_code,  // response status code
+					std::string& header,        // response header
+					std::string& body,          // response body
+					// タイムアウトまでの時間
+					int timeout,
+					// メソッド
+					typename method::POST
+				) {
+					// フラグ初期化
+					stopped_ = false;
+					// request作成
+					boost::asio::streambuf request;
+					make_request::http_post(request, host, file, headers, option);
+					// 処理開始
+					run_impl(host, "https", request, status_code, header, body, timeout);
+					// この時点でstopしてなければ正常終了
+					bool result = !stopped_;
+					// readまで終わったのでstop
+					async_failure();
+
+					return result;
+				}
 
 				// port::host に接続する
 				// port:http, host:www.hogehoge.com
@@ -103,7 +165,9 @@ namespace lulib {
 				) {
 					if (stopped_) return false;
 					// write
-					write_async_impl( make_request::http_get(host, file, headers) , timeout_sec);
+					boost::asio::streambuf request;
+					make_request::http_get(request, host, file, headers);
+					write_async_impl(request, timeout_sec);
 
 					return !stopped_;
 				}
@@ -118,7 +182,9 @@ namespace lulib {
 				) {
 					if (stopped_) return false;
 					// write
-					write_async_impl( make_request::http_post(host, file, headers, option) , timeout_sec);
+					boost::asio::streambuf request;
+					make_request::http_post(request, host, file, headers, option);
+					write_async_impl(request, timeout_sec);
 
 					return !stopped_;
 				}
@@ -182,7 +248,49 @@ namespace lulib {
 					ios_.run();
 					// 処理が終わったのでリセット
 					ios_.reset();
+				}
+				
+				void run_impl(
+					std::string const& host,
+					std::string const& service,
+					boost::asio::streambuf &request,
+					unsigned int &status_code,
+					std::string &header,
+					std::string &body,
+					int timeout_sec
+				) {
+					// 
+					resolver_type resolver( ios_ );
+					query_type query(host, service);
+					endpoint_iterator ep_it = resolver.resolve(query);
+					
+					boost::asio::streambuf response;
+					//
+					auto success = [this](){ this->async_success(); };
+					auto failure = [this](){ this->async_failure(); };
+					auto start_read = [&, this](){
+						async::read(*this, response, success, failure);
+					};
+					auto start_write = [&, this](){
+						// writeする
+						async::write(*this, request, start_read, failure);
+					};
+					async::connect_ssl(*this, ep_it, start_write, failure);
+					
+					// deadlineをセット
+					deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
+					// deadline_timerをセット
+					deadline_.async_wait([&, this](boost::system::error_code const& error) {
+						// timeoutによる終了(false)のみresultに適用する
+						this->on_timeout(error);
+					});
 
+					// 設定したasync処理をスタートする
+					run();
+					
+					parser::http_response(response, status_code, header, body);
+
+					return;
 				}
 
 				// async処理: 処理結果が確定した段階(true or falseを指定して返すとき)でdeadlineを止める
@@ -198,7 +306,10 @@ namespace lulib {
 					deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
 
 					//
-					async::connect_ssl(*this, ep_it);
+					async::connect_ssl(*this, ep_it,
+						[this](){ this->async_success(); },
+						[this](){ this->async_failure(); }
+					);
 
 					// deadline_timerをセット
 					deadline_.async_wait([&, this](boost::system::error_code const& error) {
@@ -211,16 +322,14 @@ namespace lulib {
 					return;
 				}
 
-				void write_async_impl(std::string && mess, int timeout_sec) {
-					// リクエスト作成
-					boost::asio::streambuf request;
-					std::ostream request_stream( &request );
-					request_stream << std::move(mess);
-
+				void write_async_impl(boost::asio::streambuf &request, int timeout_sec) {
 					// deadlineをセット
 					deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
 
-					async::write(*this, request);
+					async::write(*this, request,
+						[this](){ this->async_success(); },
+						[this](){ this->async_failure(); }
+					);
 
 					// deadline_timerをセット
 					deadline_.async_wait([&, this](boost::system::error_code const& error) {
@@ -244,7 +353,10 @@ namespace lulib {
 					deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
 
 					boost::asio::streambuf response;
-					async::read(*this, response);
+					async::read(*this, response,
+						[this](){ this->async_success(); },
+						[this](){ this->async_failure(); }
+					);
 
 					// deadline_timerをセット
 					deadline_.async_wait([&, this](boost::system::error_code const& error) {
@@ -267,9 +379,6 @@ namespace lulib {
 				deadline_timer deadline_;
 				// timeoutその他により処理が終了している
 				bool stopped_;
-
-				// 
-				boost::asio::streambuf response_;
 			};
 
 		}//namespace protocol

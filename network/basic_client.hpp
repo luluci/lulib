@@ -36,18 +36,22 @@ namespace lulib {
 				std::string      const& file,         // file
 				header_container const& http_header,  // http header
 				std::string      const& option,       // option data
-				int timeout,
 				// 返り値
 				unsigned int& status_code,  // response status code
 				std::string& header,        // response header
 				std::string& body,          // response body
+				// タイムアウトまでの時間
+				int timeout,
+				// メソッド
 				Method
 			) {
+				/*
 				if ( !protocol_.connect_async(host, timeout) ) return false;
 				if ( !protocol_.write_async(host, file, http_header, option, timeout, Method()) ) return false;
 				if ( !protocol_.read_async(status_code, header, body, timeout) ) return false;
-
 				return true;
+				*/
+				return protocol_(host, file, http_header, option, status_code, header, body, timeout, Method());
 			}
 
 		private:

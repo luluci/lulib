@@ -7,8 +7,8 @@ namespace lulib {
 		namespace protocol {
 			namespace async {
 
-				template<typename Protocol>
-				void write(Protocol &p, boost::asio::streambuf &request) {
+				template<typename Protocol, typename Success, typename Failure>
+				void write(Protocol &p, boost::asio::streambuf &request, Success const& success, Failure const& failure) {
 					if (!p) return;
 
 					// io_serviceにasync_writeをセットする
@@ -16,11 +16,13 @@ namespace lulib {
 						[&](boost::system::error_code const& error, std::size_t bytes_transferred) {
 							// writeに成功した
 							if (!error) {
-								p.async_success();
+								//p.async_success();
+								success();
 							}
 							// writeに失敗した
 							else {
-								p.async_failure();
+								//p.async_failure();
+								failure();
 							}
 						}
 					);
