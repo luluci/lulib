@@ -89,7 +89,7 @@ namespace lulib {
 				error_message("failed to read from pipe.");
 			}
 			else if (size == 0) {
-				error_message("child closed pipe.");
+				error_message("child closed pipe: " << command << " < " << input);
 			}
 			::close(pipe_c2p[R]);
 

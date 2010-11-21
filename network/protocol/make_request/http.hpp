@@ -9,8 +9,9 @@ namespace lulib {
 		namespace protocol {
 			namespace make_request {
 
+				template<typename Buffer>
 				void http_get(
-					boost::asio::streambuf &request,
+					Buffer &request,
 					std::string const& host,
 					std::string const& file,
 					header_container const& header
@@ -33,8 +34,9 @@ namespace lulib {
 					
 					//return std::move(request);
 				}
+				template<typename Buffer>
 				void http_post(
-					boost::asio::streambuf &request,
+					Buffer &request,
 					std::string const& host,
 					std::string const& file,
 					header_container const& header,
@@ -67,8 +69,9 @@ namespace lulib {
 					
 					//return std::move(request);
 				}
+				template<typename Buffer>
 				void http(
-					boost::asio::streambuf &request,
+					Buffer &request,
 					std::string const& method,
 					std::string const& host,
 					std::string const& file,

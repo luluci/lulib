@@ -9,8 +9,9 @@ namespace lulib {
 			namespace parser {
 
 				// HTTPレスポンスを解析して分割する
+				template<typename Buffer>
 				void http_response(
-					boost::asio::streambuf &response,
+					Buffer &response,
 					unsigned int &status_code,
 					std::string &header,
 					std::string &body
