@@ -47,12 +47,10 @@ namespace lulib {
 						}
 						// EOFに達したので正常に取得できた
 						else if (error == boost::asio::error::eof) {
-							//p.async_success();
 							success();
 						}
 						// 失敗したので通知して終了
 						else {
-							//p.async_failure();
 							failure();
 						}
 					}

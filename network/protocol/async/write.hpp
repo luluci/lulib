@@ -16,12 +16,10 @@ namespace lulib {
 						[&](boost::system::error_code const& error, std::size_t bytes_transferred) {
 							// writeに成功した
 							if (!error) {
-								//p.async_success();
 								success();
 							}
 							// writeに失敗した
 							else {
-								//p.async_failure();
 								failure();
 							}
 						}

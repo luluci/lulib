@@ -50,7 +50,6 @@ namespace lulib {
 						}
 						// 終端に達していたら、失敗
 						else {
-							//p.async_failure();
 							failure();
 						}
 					}
@@ -64,12 +63,10 @@ namespace lulib {
 							[&](boost::system::error_code const& error) {
 								// handshakeに成功
 								if (!error) {
-									//p.async_success();
 									success();
 								}
 								// 失敗
 								else {
-									//p.async_failure();
 									failure();
 								}
 							}

@@ -35,7 +35,6 @@ namespace lulib {
 
 						// connectに成功した
 						if (!error) {
-							//p.async_success();
 							success();
 						}
 						// connectに失敗した
@@ -52,7 +51,6 @@ namespace lulib {
 						}
 						// 終端に達していたら、失敗
 						else {
-							//p.async_failure();
 							failure();
 						}
 					}
