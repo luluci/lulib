@@ -8,25 +8,27 @@ namespace lulib {
 			namespace async {
 
 				// io_serviceにasync_readをセットする
-				template<typename Protocol, typename Success, typename Failure>
-				void read(Protocol &p, boost::asio::streambuf &response, Success const& success, Failure const& failure) {
+				// Finish: 処理終了時にコールバックするファンクタ
+				template<typename Protocol, typename Finish>
+				void read(Protocol &p, boost::asio::streambuf &response, Finish const& finish) {
 					// プロトコルが閉じていたら終了
 					if (!p) return;
 
 					boost::asio::async_read( p.socket(), response, boost::asio::transfer_at_least(1),
 						[&](boost::system::error_code const& error, std::size_t bytes_transferred) {
-							detail::read_handle(error, p, response, success, failure);
+							detail::read_handle(error, bytes_transferred, p, response, finish);
 						}
 					);
 				}
 
 				namespace detail {
-					template<typename Protocol, typename Success, typename Failure>
+					template<typename Protocol, typename Finish>
 					void read_handle(
 						boost::system::error_code const& error,
+						std::size_t bytes_transferred,
 						Protocol &p,
 						boost::asio::streambuf &response,
-						Success const& success, Failure const& failure
+						Finish const& finish
 					) {
 						// プロトコルが閉じていたら終了
 						if (!p) return;
@@ -41,17 +43,17 @@ namespace lulib {
 									std::size_t bytes_transferred
 								) {
 									// 再帰呼び出し
-									detail::read_handle(error, p, response, success, failure);
+									detail::read_handle(error, bytes_transferred, p, response, finish);
 								}
 							);
 						}
-						// EOFに達したので正常に取得できた
-						else if (error == boost::asio::error::eof) {
-							success();
-						}
-						// 失敗したので通知して終了
+						// 何らかのエラーにより終了
+						// HTTPの場合: EOF?
+						// HTTPSの場合: shut_down
+						// が通知される
+						// 取得したところまで返すのでsuccess()して終了
 						else {
-							failure();
+							finish();
 						}
 					}
 				}

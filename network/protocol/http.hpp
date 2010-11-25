@@ -240,7 +240,7 @@ namespace lulib {
 					auto success = [this](){ this->async_success(); };
 					auto failure = [this](){ this->async_failure(); };
 					auto start_read = [&, this](){
-						async::read(*this, response, success, failure);  // read
+						async::read(*this, response, success);  // read
 					};
 					auto start_write = [&, this](){
 						async::write(*this, request, start_read, failure);  // write
@@ -316,8 +316,7 @@ namespace lulib {
 					// read
 					boost::asio::streambuf response;
 					async::read(*this, response,
-						[this](){ this->async_success(); },
-						[this](){ this->async_failure(); }
+						[this](){ this->async_success(); }
 					);
 					// deadline_timerをセット
 					deadline_.async_wait([this](boost::system::error_code const& error) {
