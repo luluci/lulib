@@ -233,7 +233,18 @@ namespace lulib {
 					// 変数を初期化
 					resolver_type resolver( ios_ );
 					query_type query(host, service);
-					endpoint_iterator ep_it = resolver.resolve(query);
+					// resolve() は例外投げるよ！
+					//endpoint_iterator ep_it = resolver.resolve(query);
+					///*
+					endpoint_iterator ep_it;
+					try {
+						ep_it = resolver.resolve(query);
+					}
+					catch (boost::system::system_error) {
+						async_failure();
+						return;
+					}
+					//*/
 					boost::asio::streambuf response;
 
 					// コールバックファンクタを作成
@@ -267,7 +278,18 @@ namespace lulib {
 					// 変数を初期化
 					resolver_type resolver( ios_ );
 					query_type query(host, service);
-					endpoint_iterator ep_it = resolver.resolve(query);
+					// resolve() は例外投げるよ！
+					//endpoint_iterator ep_it = resolver.resolve(query);
+					///*
+					endpoint_iterator ep_it;
+					try {
+						ep_it = resolver.resolve(query);
+					}
+					catch (boost::system::system_error) {
+						async_failure();
+						return;
+					}
+					//*/
 					// deadlineをセット
 					deadline_.expires_from_now(boost::posix_time::seconds(timeout_sec));
 					// 通信をセット
