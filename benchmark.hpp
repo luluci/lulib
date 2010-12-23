@@ -24,7 +24,7 @@ namespace lulib {
 
 	// Loop回のループをSetセットだけ行う
 	// その際、最初のIdle回空回しする
-	template<std::size_t Set, std::size_t Loop, std::size_t Idle = 0, bool DispSet = true>
+	template<std::size_t Loop, std::size_t Set, std::size_t Idle = 0, bool DispEachSet = true>
 	class benchmark {
 
 	public:
@@ -61,7 +61,7 @@ namespace lulib {
 			end_ = std::clock();
 			total_ += (end_ - start_);
 
-			if (DispSet) {
+			if (DispEachSet) {
 				std::cerr << "Set : " << i << std::endl;
 				std::cerr << "start (msec) : " << start_ << std::endl;
 				std::cerr << "end   (msec) : " << end_ << std::endl;
