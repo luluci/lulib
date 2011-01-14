@@ -43,11 +43,12 @@ namespace lulib {
 	namespace program_option {
 		class option {
 			struct value_type {
-				boost::any data_;
-				bool active_, is_push_back_c_, is_void_;
-
-				value_type() : active_(false), is_push_back_c_(false), is_void_(false), type_(0) {}
-				value_type(const value_type& rhs) : type_(rhs.type_ ? rhs.type_->clone() : 0) {
+				value_type() : active_(false), is_push_back_c_(false), is_void_(false), type_(0) {
+				}
+				value_type(value_type const& rhs)
+					: data_(rhs.data_), active_(rhs.active_), is_push_back_c_(rhs.is_push_back_c_),
+					is_void_(rhs.is_void_), type_(rhs.type_ ? rhs.type_->clone() : 0)
+				{
 					data_ = rhs.data_;
 					active_ = rhs.active_;
 					is_push_back_c_ = rhs.is_push_back_c_;
@@ -57,12 +58,11 @@ namespace lulib {
 					delete type_;
 				}
 
-				class bad_as : public std::bad_cast {
-				public:
-					virtual const char * what() const throw() {
-						return "lulib::program_option: failed conversion using as<>";
-					}
-				};
+				value_type& operator=(value_type rhs) {
+					std::swap(type_, rhs.type_);
+					return *this;
+				}
+
 				template<typename T>
 				T& as() {
 					T* ptr = boost::any_cast<T>(&data_);
@@ -74,21 +74,24 @@ namespace lulib {
 					return boost::any_cast<T>(&data_);
 				}
 
+				// T::push_back() がある
 				template<typename T>
-				void add(const char* str, typename boost::enable_if< type_traits::has_push_back<T> >::type* = 0) {
+				void add(
+					const char* str,
+					typename boost::enable_if< type_traits::has_push_back<T> >::type* = 0
+				) {
 					typedef typename T::value_type type;
 					type value = boost::lexical_cast<type>(str);
 					boost::any_cast<T>(&data_)->push_back(value);
 				}
+				// T::push_back() がない
 				template<typename T>
-				void add(const char* str, typename boost::disable_if< type_traits::has_push_back<T> >::type* = 0) {
+				void add(
+					const char* str,
+					typename boost::disable_if< type_traits::has_push_back<T> >::type* = 0
+				) {
 					T value = boost::lexical_cast<T>(str);
 					data_ = value;
-				}
-
-				value_type& operator=(value_type rhs) {
-					std::swap(type_, rhs.type_);
-					return *this;
 				}
 
 				// 型Tでvalue_typeを初期化する
@@ -99,23 +102,25 @@ namespace lulib {
 					if (type_ != 0) delete type_;
 					type_ = new holder<T>();
 				}
-				void set(const char* str) {
+				// 値は、型Tを保持しているholderを通してセットする
+				void set(char const* str) {
 					type_->set(*this, str);
 				}
 
+				// TypeErasure
+				// 型を記憶しておく
 				struct holder_base {
 					virtual ~holder_base(){}
 
-					virtual void set(value_type& data, const char* str) = 0;
+					virtual void set(value_type& data, char const* str) = 0;
 
 					virtual holder_base* clone() const = 0;
 				};
-
 				template<typename T>
 				struct holder : holder_base {
 					typedef T type;
 
-					virtual void set(value_type& data, const char* str) {
+					virtual void set(value_type& data, char const* str) {
 						data.add<T>( str );
 					}
 					virtual holder_base* clone() const {
@@ -123,11 +128,20 @@ namespace lulib {
 					}
 				};
 
+				class bad_as : public std::bad_cast {
+				public:
+					virtual const char * what() const throw() {
+						return "lulib::program_option: failed conversion using as<>";
+					}
+				};
+
+				boost::any data_;
+				bool active_, is_push_back_c_, is_void_;
 				holder_base *type_;
 			};
 			typedef std::map<std::string, value_type> container;
-			container c_;
 			typedef std::map<char, value_type*> ptr_container;
+			container c_;
 			ptr_container ch_c_;
 
 			typedef std::pair<container::iterator, bool> result_type;
@@ -159,7 +173,7 @@ namespace lulib {
 				if (!it->second->active_) return false;
 				return true;
 			}
-			value_type& operator[](const std::string& key) {
+			value_type& operator[](std::string const& key) {
 				container::iterator it = c_.find(key);
 				if (it == c_.end()) throw std::out_of_range("not found argument");
 				return it->second;
@@ -168,7 +182,12 @@ namespace lulib {
 			// 指定した名前のコマンドライン引数を有効（受け付けるよう）にする
 			// push_back()を持つなら
 			template<typename T>
-			void enable(const std::string& key_str, char key_ch, const std::string& descript, typename boost::enable_if< type_traits::has_push_back<T> >::type* = 0) {
+			void enable(
+				const std::string& key_str,
+				char key_ch,
+				const std::string& descript,
+				typename boost::enable_if< type_traits::has_push_back<T> >::type* = 0
+			) {
 				result_type res = c_.insert( std::make_pair(key_str, value_type()) );
 
 				// 挿入に失敗（すでに指定されていたら）
@@ -197,7 +216,12 @@ namespace lulib {
 			}
 			// push_back()を持たないなら
 			template<typename T>
-			void enable(const std::string& key_str, char key_ch, const std::string& descript, typename boost::disable_if< type_traits::has_push_back<T> >::type* = 0) {
+			void enable(
+				const std::string& key_str,
+				char key_ch,
+				const std::string& descript,
+				typename boost::disable_if< type_traits::has_push_back<T> >::type* = 0
+			) {
 				result_type res = c_.insert( std::make_pair(key_str, value_type()) );
 
 				// 挿入に失敗（すでに指定されていたら）
@@ -253,7 +277,7 @@ namespace lulib {
 			}
 
 			// "--?", "-?"で修飾されない引数
-			void nomodify(const std::string& str) {
+			void nomodify(std::string const& str) {
 				nomodify_ = str;
 			}
 
@@ -291,6 +315,7 @@ namespace lulib {
 				}
 			}
 
+		private:
 			int parse_char(char key, int argc, char **argv, int index) {
 				ptr_container::iterator it = ch_c_.find(key);
 
@@ -318,7 +343,7 @@ namespace lulib {
 
 				return (index + 1);
 			}
-			int parse_string(const std::string& key, int argc, char **argv, int index) {
+			int parse_string(std::string const& key, int argc, char **argv, int index) {
 				container::iterator it = c_.find(key);
 
 				// 無効なキーなら
