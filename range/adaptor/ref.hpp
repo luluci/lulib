@@ -112,7 +112,7 @@ namespace lulib { namespace range { namespace adaptors {
 			ref_opt ref_;
 		};
 
-		// tag dispatch“I‚È
+		// tag dispatchçš„ãª
 		template<typename Container>
 		struct ref_t {
 			typedef Container container_type;
@@ -129,8 +129,8 @@ namespace lulib { namespace range { namespace adaptors {
 			}
 		};
 
-		// pipe“I‚È
-		// ADL‚ÅŒÄ‚Ño‚³‚ê‚é‚æ‚ñ
+		// pipeçš„ãª
+		// ADLã§å‘¼ã³å‡ºã•ã‚Œã‚‹ã‚ˆã‚“
 		template<typename V, typename I, typename A, typename C>
 		inline ref_range<
 			boost::multi_index::multi_index_container<V,I,A>,
@@ -163,13 +163,13 @@ namespace lulib { namespace range { namespace adaptors {
 
 	//using detail::ref_range;
 
-	// ref‚Å‚·
+	// refã§ã™
 	namespace {
 		const detail::ref_t<int> ref = detail::ref_t<int>();
 	}
 
 	/*
-	// è“®rangeì¬ŠÖ”H
+	// æ‰‹å‹•rangeä½œæˆé–¢æ•°ï¼Ÿ
 	template<typename Range>
 	inline void//ref_range<Range>
 	ref(Range &rng) {
