@@ -98,7 +98,7 @@ namespace lulib { namespace range { namespace adaptors {
 
 		public:
 			typedef Container conatiner_type;
-			typedef lulib::range::adaptor_tag adaptor_category;
+			typedef lulib::range::post_adaptor_tag adaptor_category;
 			typedef ref_iterator< typename boost::range_iterator<Range>::type, Container > iterator;
 
 			explicit ref_range (Range &r, ref_opt & ref)
@@ -136,10 +136,7 @@ namespace lulib { namespace range { namespace adaptors {
 			boost::multi_index::multi_index_container<V,I,A>,
 			boost::multi_index::multi_index_container<V,I,A>
 		>
-		operator|(
-			boost::multi_index::multi_index_container<V,I,A> &mic,
-			ref_t<C>
-		) {
+		operator|( boost::multi_index::multi_index_container<V,I,A> &mic, ref_t<C> ) {
 			typedef boost::multi_index::multi_index_container<V,I,A> container;
 			typedef ref_range< container, container > result_type;
 			//std::cout << "    operator|(boost::multi_index::multi_index_container<V,I,A> &mic, ref_t const& ref)" << std::endl;
