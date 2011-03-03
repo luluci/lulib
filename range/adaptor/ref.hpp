@@ -1,21 +1,8 @@
 #pragma once
 
-
-
-
-
-//#include <iostream>
-
-
-
-
-
-
 #include <boost/iterator.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/iterator/iterator_categories.hpp>
-
-//#include <boost/iterator/iterator_traits.hpp>
 
 #include <boost/range/iterator_range.hpp>
 
@@ -23,7 +10,7 @@
 
 #include <boost/optional.hpp>
 
-#include <lulib/range/adaptor/adaptor_categories.hpp>
+#include <lulib/range/range_categories.hpp>
 
 namespace lulib { namespace range { namespace adaptors {
 
@@ -98,7 +85,8 @@ namespace lulib { namespace range { namespace adaptors {
 
 		public:
 			typedef Container conatiner_type;
-			typedef lulib::range::post_adaptor_tag adaptor_category;
+			typedef lulib::range::post_range_tag range_category;
+
 			typedef ref_iterator< typename boost::range_iterator<Range>::type, Container > iterator;
 
 			explicit ref_range (Range &r, ref_opt & ref)
