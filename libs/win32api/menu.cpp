@@ -9,8 +9,9 @@
 int WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int cmdShow) {
 
 	// ƒƒjƒ…[ì¬
-	lulib::win32api::menu_type menu;
-	typedef lulib::win32api::menu_type::state state;
+	typedef lulib::win32api::menu::menu menu_type;
+	menu_type menu;
+	typedef menu_type::state state;
 	menu.insert_item(0, "menu-0");
 	menu.set_defitem(0);
 	menu.insert_item(1, "menu-1");

@@ -8,6 +8,7 @@
 #include <memory>
 #include <type_traits>
 
+#include <lulib/win32api/menu/detail/menu_traits.hpp>
 #include <lulib/win32api/menu/detail/menu_item_info.hpp>
 #include <lulib/win32api/menu/detail/menu_item_type.hpp>
 #include <lulib/win32api/exceptions.hpp>
@@ -26,14 +27,20 @@ namespace lulib { namespace win32api { namespace menu {
 	}
 
 	// メニュークラス
-	template<HMENU (WINAPI *create_menu)()>
+	template<HMENU (WINAPI *create_menu)(), typename Char = TCHAR>
 	class basic_menu {
-		typedef basic_menu<create_menu> self_type;
+		typedef basic_menu<create_menu, Char> self_type;
 
-		// char型
-		typedef lulib::char_traits<TCHAR> char_traits;
-		typedef char_traits::char_type   char_type;
-		typedef char_traits::string_type string_type;
+		// Char型特性
+		typedef lulib::char_traits<Char> char_traits;
+		typedef typename char_traits::char_type   char_type;
+		typedef typename char_traits::string_type string_type;
+
+		// Menu型特性
+		typedef detail::menu_traits<Char> menu_traits;
+
+		// MenuItemInfo型
+		typedef detail::basic_menu_item_info<Char> menu_item_info;
 
 		// HMENUハンドラ
 		// これは共有しないよ！
@@ -96,19 +103,19 @@ namespace lulib { namespace win32api { namespace menu {
 			return insert_item(id, id, string);
 		}
 		bool insert_item(std::size_t idx, std::size_t id, char_type const* string) {
-			detail::menu_item_info mii;
+			menu_item_info mii;
 			mii.id(id);
 			mii.string(string);
 			// メニューアイテムを挿入
-			return ( ::InsertMenuItem(menu_ptr_.get(), idx, true, mii) == TRUE );
+			return ( menu_traits::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
 		}
 
 		// セパレータの挿入
 		bool insert_separator(std::size_t idx) {
-			detail::menu_item_info mii;
+			menu_item_info mii;
 			mii.separator();
 			// セパレータを追加
-			return ( ::InsertMenuItem(menu_ptr_.get(), idx, true, mii) == TRUE );
+			return ( menu_traits::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
 		}
 
 		// サブメニューアイテムを挿入
@@ -116,7 +123,7 @@ namespace lulib { namespace win32api { namespace menu {
 			return insert_submenu(id, id, string);
 		}
 		bool insert_submenu(std::size_t idx, std::size_t id, char_type const* string) {
-			detail::menu_item_info mii;
+			menu_item_info mii;
 			mii.id(id);
 			mii.string(string);
 
@@ -127,7 +134,7 @@ namespace lulib { namespace win32api { namespace menu {
 			mii.submenu( *(result.first->second) );
 
 			// メニューアイテムを挿入
-			return ( ::InsertMenuItem(menu_ptr_.get(), idx, true, mii) == TRUE );
+			return ( menu_traits::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
 		}
 
 		// stateを使う
@@ -138,9 +145,9 @@ namespace lulib { namespace win32api { namespace menu {
 			return set_state(id, FALSE, s);
 		}
 		bool set_state(std::size_t id, BOOL id_is_position, std::size_t s) {
-			detail::menu_item_info mii;
+			menu_item_info mii;
 			mii.state(s);
-			return ( ::SetMenuItemInfo(menu_ptr_.get(), id, id_is_position, mii) == TRUE );
+			return ( menu_traits::set_menu_item_info(menu_ptr_.get(), id, id_is_position, mii) == TRUE );
 		}
 		// enableにする
 		bool set_enable(std::size_t id) {
