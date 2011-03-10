@@ -5,15 +5,15 @@
 
 namespace lulib { namespace win32api { namespace menu {
 
-	// Unicodeƒtƒ‰ƒO(TCHAR)‚ÉˆË‘¶‚µ‚½ƒfƒtƒHƒ‹ƒgƒƒjƒ…[Œ^
+	// Unicodeãƒ•ãƒ©ã‚°(TCHAR)ã«ä¾å­˜ã—ãŸãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ¡ãƒ‹ãƒ¥ãƒ¼å‹
 	typedef basic_menu< ::CreateMenu >            menu;
 	typedef basic_menu< ::CreatePopupMenu > popup_menu;
 
-	// ƒ}ƒ‹ƒ`ƒoƒCƒg•¶šƒƒjƒ…[Œ^
+	// ãƒãƒ«ãƒãƒã‚¤ãƒˆæ–‡å­—ãƒ¡ãƒ‹ãƒ¥ãƒ¼å‹
 	typedef basic_menu< ::CreateMenu,      char >       menu_a;
 	typedef basic_menu< ::CreatePopupMenu, char > popup_menu_a;
 
-	// ƒƒCƒh•¶šƒƒjƒ…[Œ^
+	// ãƒ¯ã‚¤ãƒ‰æ–‡å­—ãƒ¡ãƒ‹ãƒ¥ãƒ¼å‹
 	typedef basic_menu< ::CreateMenu,      wchar_t >       menu_w;
 	typedef basic_menu< ::CreatePopupMenu, wchar_t > popup_menu_w;
 

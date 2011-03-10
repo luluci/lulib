@@ -8,7 +8,7 @@
 
 int WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int cmdShow) {
 
-	// ƒƒjƒ…[ì¬
+	// ãƒ¡ãƒ‹ãƒ¥ãƒ¼ä½œæˆ
 	typedef lulib::win32api::menu::menu menu_type;
 	menu_type menu;
 	typedef menu_type::state state;
@@ -72,31 +72,31 @@ int WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int cmdShow) {
 	};
 
 	WNDCLASSEX wc;
-	wc.cbSize        = sizeof(WNDCLASSEX);         // \‘¢‘ÌƒTƒCƒY
-	wc.style         = CS_HREDRAW | CS_VREDRAW;    // ƒNƒ‰ƒXƒXƒ^ƒCƒ‹
-	wc.cbClsExtra    = 0;                          // •â‘«ƒƒ‚ƒŠƒuƒƒbƒN
-	wc.cbWndExtra    = 0;                          //   ‚ÌƒTƒCƒY
-	wc.hInstance     = hInst;                      // ƒCƒ“ƒXƒ^ƒ“ƒX
+	wc.cbSize        = sizeof(WNDCLASSEX);         // æ§‹é€ ä½“ã‚µã‚¤ã‚º
+	wc.style         = CS_HREDRAW | CS_VREDRAW;    // ã‚¯ãƒ©ã‚¹ã‚¹ã‚¿ã‚¤ãƒ«
+	wc.cbClsExtra    = 0;                          // è£œè¶³ãƒ¡ãƒ¢ãƒªãƒ–ãƒ­ãƒƒã‚¯
+	wc.cbWndExtra    = 0;                          //   ã®ã‚µã‚¤ã‚º
+	wc.hInstance     = hInst;                      // ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹
 	wc.hIcon         = NULL;
-	wc.hCursor       = LoadCursor(NULL,IDC_ARROW); // ƒJ[ƒ\ƒ‹
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);   // ”wŒiF
+	wc.hCursor       = LoadCursor(NULL,IDC_ARROW); // ã‚«ãƒ¼ã‚½ãƒ«
+	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);   // èƒŒæ™¯è‰²
 	wc.lpszMenuName  = NULL;
-	wc.lpszClassName = "test";                 // ƒNƒ‰ƒX–¼
+	wc.lpszClassName = "test";                 // ã‚¯ãƒ©ã‚¹å
 	wc.hIconSm       = NULL;
-	// ƒEƒBƒ“ƒhƒEƒvƒƒV[ƒWƒƒ
+	// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ãƒ—ãƒ­ã‚·ãƒ¼ã‚¸ãƒ£
 	//wc.lpfnWndProc   = (WNDPROC)WndProc;
 	wc.lpfnWndProc = (WNDPROC)proc;
-	if (!RegisterClassEx(&wc)) return FALSE;       // “o˜^
+	if (!RegisterClassEx(&wc)) return FALSE;       // ç™»éŒ²
 
-	// ƒEƒBƒ“ƒhƒE‚Ìì¬
+	// ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ä½œæˆ
 	HWND hWnd = CreateWindowEx(
 		0,
 		"test",
 		"test",
 		WS_VISIBLE | WS_CLIPCHILDREN | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_THICKFRAME,
 		100,100,400,100,  // X Y width height
-		0,  // eƒEƒBƒ“ƒhƒE
-		menu,  // ƒƒjƒ…[ƒnƒ“ƒhƒ‹
+		0,  // è¦ªã‚¦ã‚£ãƒ³ãƒ‰ã‚¦
+		menu,  // ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒãƒ³ãƒ‰ãƒ«
 		hInst,
 		0
 	);

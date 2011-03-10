@@ -73,6 +73,7 @@ namespace lulib { namespace win32api { namespace menu {
 		self_type& operator=(self_type &&obj) {
 			menu_ptr_ = std::move(obj.menu_ptr_);
 			c_ = std::move(obj.c_);
+			return *this;
 		}
 	private:
 		basic_menu(self_type const& obj);

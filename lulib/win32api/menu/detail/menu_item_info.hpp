@@ -33,6 +33,7 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 		// copy op
 		self_type& operator=(self_type const& obj) {
 			mii_ = obj.mii_;
+			return *this;
 		}
 
 		operator MENUITEMINFO*() {
@@ -43,34 +44,40 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 		self_type& id(std::size_t id) {
 			mii_.fMask |= mask::id;
 			mii_.wID = id;
+			return *this;
 		}
 
 		// string属性を付与
 		self_type& string(char_type const* str) {
 			mii_.fMask |= mask::string;
 			mii_.dwTypeData = const_cast<char_type*>(str);
+			return *this;
 		}
 		self_type& string(string_type const& str) {
 			mii_.fMask |= mask::string;
 			mii_.dwTypeData = const_cast<char_type*>(str.c_str());
+			return *this;
 		}
 
 		// submenuを付与
 		self_type& submenu(HMENU hMenu) {
 			mii_.fMask |= mask::submenu;
 			mii_.hSubMenu = hMenu;
+			return *this;
 		}
 
 		// separatorを付与
 		self_type& separator() {
 			mii_.fMask |= mask::ftype;
 			mii_.fType = ftype::separator;
+			return *this;
 		}
 
 		// stateを付与
 		self_type& state(std::size_t s) {
 			mii_.fMask |= mask::state;
 			mii_.fState = s;
+			return *this;
 		}
 
 	private:
