@@ -4,7 +4,7 @@
 #include <windows.h>
 
 #include <lulib/win32api/window/procedure_fwd.hpp>
-#include <lulib/win32api/window/window_traits.hpp>
+#include <lulib/win32api/window/policy.hpp>
 
 #include <lulib/type_traits/char_traits.hpp>
 
@@ -20,9 +20,9 @@ namespace lulib { namespace win32api { namespace window {
 		typedef typename char_traits::char_type   char_type;
 		typedef typename char_traits::string_type string_type;
 
-		// window型特性
-		typedef window_traits<TCHAR> wnd_traits;
-		typedef typename wnd_traits::wnd_class wnd_class;
+		// windowポリシー
+		typedef window::policy<TCHAR> policy;
+		typedef typename policy::wnd_class wnd_class;
 
 	public:
 		basic_window_class() : wc_(), class_name_() {
@@ -30,7 +30,7 @@ namespace lulib { namespace win32api { namespace window {
 		}
 
 		bool register_class() {
-			return ( wnd_traits::register_class(&wc_) != 0 );
+			return ( policy::register_class(&wc_) != 0 );
 		}
 
 		// Default

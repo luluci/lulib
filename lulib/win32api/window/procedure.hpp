@@ -4,7 +4,7 @@
 #include <windows.h>
 
 #include <lulib/win32api/window/basic_window.hpp>
-#include <lulib/win32api/window/window_traits.hpp>
+#include <lulib/win32api/window/policy.hpp>
 
 #include <boost/mpl/print.hpp>
 
@@ -15,14 +15,14 @@ namespace lulib { namespace win32api { namespace window {
 		//boost::mpl::print< window::basic_window<char> > abc;
 		// window型
 		typedef window::basic_window<Char> window_type;
-		// Window型特性
-		typedef window_traits<Char> window_traits;
+		// Windowポリシー
+		typedef window::policy<Char> policy;
 
 		// USERDATAを取得
-		LONG_PTR ptr = window_traits::get_window_long_ptr(hWnd, GWLP_USERDATA);
+		LONG_PTR ptr = policy::get_window_long_ptr(hWnd, GWLP_USERDATA);
 
 		// 0ならDefWindowProcにまかせる
-		if (ptr == 0) return window_traits::def_window_proc(hWnd, msg, wParam, lParam);
+		if (ptr == 0) return policy::def_window_proc(hWnd, msg, wParam, lParam);
 
 		// 値があれば、一部のメッセージを処理
 		// ポインタを取得

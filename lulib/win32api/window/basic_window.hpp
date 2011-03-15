@@ -7,17 +7,14 @@
 #include <functional>
 
 #include <lulib/win32api/window/basic_window_class.hpp>
-#include <lulib/win32api/window/window_traits.hpp>
+#include <lulib/win32api/window/attributes_fwd.hpp>
+#include <lulib/win32api/window/policy.hpp>
 #include <lulib/win32api/menu_fwd.hpp>
 #include <lulib/win32api/exceptions.hpp>
 
 #include <lulib/type_traits/char_traits.hpp>
 
 namespace lulib { namespace win32api { namespace window {
-
-	// forward
-	struct ex_style;
-	struct style;
 
 	namespace detail {
 		struct HWND_deleter {
@@ -40,8 +37,8 @@ namespace lulib { namespace win32api { namespace window {
 		typedef typename char_traits::char_type   char_type;
 		typedef typename char_traits::string_type string_type;
 
-		// window型特性
-		typedef window_traits<TCHAR> wnd_traits;
+		// windowポリシー
+		typedef window::policy<TCHAR> policy;
 
 		// ウィンドウプロシージャコールバック
 		typedef std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> procedure_type;
@@ -92,7 +89,7 @@ namespace lulib { namespace win32api { namespace window {
 			if (menu_ptr_) hMenu = *menu_ptr_;
 
 			// ウィンドウを作成
-			HWND hWnd = wnd_traits::create_window(
+			HWND hWnd = policy::create_window(
 				ex_style_,
 				const_cast<char_type*>( class_name_.c_str() ),
 				const_cast<char_type*>( window_name_.c_str() ),
@@ -109,7 +106,7 @@ namespace lulib { namespace win32api { namespace window {
 			// 成功なら、unique_ptrにセット
 			wnd_ptr_.reset(hWnd);
 			// GWLP_USERDATA にthisをセットする
-			wnd_traits::set_window_long_ptr(
+			policy::set_window_long_ptr(
 				wnd_ptr_.get(),
 				GWLP_USERDATA,
 				reinterpret_cast<LONG_PTR>(this)
@@ -161,8 +158,8 @@ namespace lulib { namespace win32api { namespace window {
 
 	public:
 		// friend関数
-		template<typename T> friend basic_window<T>& operator<<(basic_window<T>&, ex_style &&);
-		template<typename T> friend basic_window<T>& operator<<(basic_window<T>&, style &&);
+		template<typename T> friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::ex_style &&);
+		template<typename T> friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::style &&);
 
 	private:
 		wnd_ptr wnd_ptr_;

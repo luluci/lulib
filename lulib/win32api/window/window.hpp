@@ -3,8 +3,7 @@
 
 #include <lulib/win32api/window/basic_window_class.hpp>
 #include <lulib/win32api/window/basic_window.hpp>
-#include <lulib/win32api/window/ex_style.hpp>
-#include <lulib/win32api/window/style.hpp>
+#include <lulib/win32api/window/attributes.hpp>
 #include <lulib/win32api/window/procedure.hpp>
 
 namespace lulib { namespace win32api { namespace window {

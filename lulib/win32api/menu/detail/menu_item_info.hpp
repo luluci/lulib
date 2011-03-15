@@ -1,7 +1,7 @@
 #pragma once
 #pragma warning(disable : 4819)
 
-#include <lulib/win32api/menu/detail/menu_traits.hpp>
+#include <lulib/win32api/menu/policy.hpp>
 #include <lulib/win32api/menu/detail/menu_item_type.hpp>
 #include <lulib/type_traits/char_traits.hpp>
 
@@ -16,9 +16,9 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 		typedef typename char_traits::char_type   char_type;
 		typedef typename char_traits::string_type string_type;
 
-		// Menu型特性
-		typedef detail::menu_traits<Char> menu_traits;
-		typedef typename menu_traits::menu_item_info_type menu_item_info_type;
+		// Menuポリシー
+		typedef menu::policy<Char> policy;
+		typedef typename policy::menu_item_info_type menu_item_info_type;
 
 	public:
 		// ctor

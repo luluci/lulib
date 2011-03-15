@@ -8,7 +8,7 @@
 #include <memory>
 #include <type_traits>
 
-#include <lulib/win32api/menu/detail/menu_traits.hpp>
+#include <lulib/win32api/menu/policy.hpp>
 #include <lulib/win32api/menu/detail/menu_item_info.hpp>
 #include <lulib/win32api/menu/detail/menu_item_type.hpp>
 #include <lulib/win32api/exceptions.hpp>
@@ -36,8 +36,8 @@ namespace lulib { namespace win32api { namespace menu {
 		typedef typename char_traits::char_type   char_type;
 		typedef typename char_traits::string_type string_type;
 
-		// Menu型特性
-		typedef detail::menu_traits<Char> menu_traits;
+		// Menuポリシー
+		typedef menu::policy<Char> policy;
 
 		// MenuItemInfo型
 		typedef detail::basic_menu_item_info<Char> menu_item_info;
@@ -108,7 +108,7 @@ namespace lulib { namespace win32api { namespace menu {
 			mii.id(id);
 			mii.string(string);
 			// メニューアイテムを挿入
-			return ( menu_traits::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
+			return ( policy::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
 		}
 
 		// セパレータの挿入
@@ -116,7 +116,7 @@ namespace lulib { namespace win32api { namespace menu {
 			menu_item_info mii;
 			mii.separator();
 			// セパレータを追加
-			return ( menu_traits::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
+			return ( policy::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
 		}
 
 		// サブメニューアイテムを挿入
@@ -135,7 +135,7 @@ namespace lulib { namespace win32api { namespace menu {
 			mii.submenu( *(result.first->second) );
 
 			// メニューアイテムを挿入
-			return ( menu_traits::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
+			return ( policy::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
 		}
 
 		// stateを使う
@@ -148,7 +148,7 @@ namespace lulib { namespace win32api { namespace menu {
 		bool set_state(std::size_t id, BOOL id_is_position, std::size_t s) {
 			menu_item_info mii;
 			mii.state(s);
-			return ( menu_traits::set_menu_item_info(menu_ptr_.get(), id, id_is_position, mii) == TRUE );
+			return ( policy::set_menu_item_info(menu_ptr_.get(), id, id_is_position, mii) == TRUE );
 		}
 		// enableにする
 		bool set_enable(std::size_t id) {
