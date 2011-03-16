@@ -61,6 +61,19 @@ namespace lulib { namespace win32api { namespace window {
 			return ::SetWindowLongPtrA(hWnd, nIndex, dwNewLong);
 		}
 
+		// ::GetWindowTextLength
+		inline static int get_window_text_length(HWND hWnd) {
+			return ::GetWindowTextLengthA(hWnd);
+		}
+		// ::GetWindowText
+		inline static int get_window_text(HWND hWnd, LPSTR string, int size) {
+			return ::GetWindowTextA(hWnd, string, size);
+		}
+		// ::SetWindowText
+		inline static BOOL set_window_text(HWND hWnd, LPCSTR string) {
+			return ::SetWindowTextA(hWnd, string);
+		}
+
 	};
 
 	template<>
@@ -113,6 +126,19 @@ namespace lulib { namespace win32api { namespace window {
 		// ::SetWindowLongPtr
 		inline static LONG_PTR set_window_long_ptr(HWND hWnd, int nIndex, LONG_PTR dwNewLong) {
 			return ::SetWindowLongPtrW(hWnd, nIndex, dwNewLong);
+		}
+
+		// ::GetWindowTextLength
+		inline static int get_window_text_length(HWND hWnd) {
+			return ::GetWindowTextLengthW(hWnd);
+		}
+		// ::GetWindowText
+		inline static int get_window_text(HWND hWnd, LPWSTR string, int size) {
+			return ::GetWindowTextW(hWnd, string, size);
+		}
+		// ::SetWindowText
+		inline static BOOL set_window_text(HWND hWnd, LPCWSTR string) {
+			return ::SetWindowTextW(hWnd, string);
 		}
 
 	};

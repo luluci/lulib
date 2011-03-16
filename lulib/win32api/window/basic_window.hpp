@@ -58,8 +58,13 @@ namespace lulib { namespace win32api { namespace window {
 	public:
 		basic_window()
 			: wnd_ptr_(), ex_style_(), class_name_(), window_name_()
-			, style_(WS_OVERLAPPEDWINDOW)
+			, style_(WS_OVERLAPPEDWINDOW), x_(), y_(), w_(), h_(), hParent_()
+			, menu_ptr_(), hInst_(), proc_()
 		{
+		}
+
+		inline operator HWND() {
+			return wnd_ptr_.get();
 		}
 
 	private:
@@ -94,7 +99,7 @@ namespace lulib { namespace win32api { namespace window {
 				const_cast<char_type*>( class_name_.c_str() ),
 				const_cast<char_type*>( window_name_.c_str() ),
 				style_,
-				pos_.left, pos_.top, (pos_.right - pos_.left), (pos_.bottom - pos_.top),
+				x_, y_, w_, h_,
 				hParent_,
 				hMenu,
 				hInst_,
@@ -114,10 +119,6 @@ namespace lulib { namespace win32api { namespace window {
 
 			return true;
 		}
-
-		// ウィンドウの名前
-		inline void window_name(char_type const* str) { window_name_ = str; }
-		inline void window_name(string_type const& str) { window_name_ = str; }
 
 		// ウィンドウクラスのセット
 		inline void class_name(char_type const* str) { class_name_ = str; }
@@ -149,30 +150,30 @@ namespace lulib { namespace win32api { namespace window {
 			menu_ptr_ = std::move(p);
 		}
 
-		// 座標のセット
-		inline void rect(RECT const& rc) { pos_ = rc; }
-		inline void rect(int x, int y, int w, int h) {
-			pos_.left = x; pos_.top = y;
-			pos_.right = x + w; pos_.bottom = y + h;
-		}
-
 	public:
 		// friend関数
+		// Window Ex Style の操作
 		template<typename T> friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::ex_style &&);
+		// Window Style の操作
 		template<typename T> friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::style &&);
+		// タイトルバーテキスト の操作
+		template<typename T> friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::basic_title<T> &&);
+		// ウィンドウ位置の操作
+		template<typename T> friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::position &&);
+		// ウィンドウサイズの操作
+		template<typename T> friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::size &&);
 
 	private:
-		wnd_ptr wnd_ptr_;
-		std::size_t ex_style_;
-		string_type class_name_;
-		string_type window_name_;
-		std::size_t style_;
-		RECT pos_;
-		HWND hParent_;
-		// Menu型のshared_ptrを持つ
-		menu_ptr menu_ptr_;
-		HINSTANCE hInst_;
-		procedure_type proc_;
+		wnd_ptr wnd_ptr_;          // HWNDハンドラ
+		std::size_t ex_style_;     // ウィンドウ拡張スタイル
+		string_type class_name_;   // ウィンドウクラス名
+		string_type window_name_;  // タイトルバーに表示されるテキスト
+		std::size_t style_;        // ウィンドウスタイル
+		int x_, y_, w_, h_;        // ウィンドウの座標とサイズ
+		HWND hParent_;             // 親ウィンドウハンドル
+		menu_ptr menu_ptr_;        // HMENUハンドラ : nullを許容
+		HINSTANCE hInst_;          // HINSTANCE
+		procedure_type proc_;      // ウィンドウプロシージャ
 	};
 
 }}}// namespace lulib::win32api::window
