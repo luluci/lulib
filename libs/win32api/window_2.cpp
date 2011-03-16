@@ -6,8 +6,6 @@
 #include <windows.h>
 
 #include <functional>
-#include <string>
-#include <sstream>
 
 #include <lulib/win32api/window.hpp>
 #include <lulib/win32api/menu.hpp>

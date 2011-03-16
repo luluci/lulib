@@ -51,17 +51,17 @@ namespace lulib { namespace win32api { namespace window { namespace attribute {
 	basic_window<Char>& operator<<(basic_window<Char>& wnd, size &&s) {
 		// styleを更新
 		switch (s.mode_) {
-			case position::subst: {
+			case size::subst: {
 				if (s.w_ != -1) wnd.w_ = s.w_;
 				if (s.h_ != -1) wnd.h_ = s.h_;
 				break;
 			}
-			case position::add: {
+			case size::add: {
 				if (s.w_ != -1) wnd.w_ += s.w_;
 				if (s.h_ != -1) wnd.h_ += s.h_;
 				break;
 			}
-			case position::sub: {
+			case size::sub: {
 				if (s.w_ != -1) wnd.w_ -= s.w_;
 				if (s.h_ != -1) wnd.h_ -= s.h_;
 				break;

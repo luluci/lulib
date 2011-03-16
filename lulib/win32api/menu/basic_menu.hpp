@@ -37,7 +37,7 @@ namespace lulib { namespace win32api { namespace menu {
 		typedef typename char_traits::string_type string_type;
 
 		// Menuポリシー
-		typedef menu::policy<Char> policy;
+		typedef ::lulib::win32api::menu::policy<Char> policy;
 
 		// MenuItemInfo型
 		typedef detail::basic_menu_item_info<Char> menu_item_info;

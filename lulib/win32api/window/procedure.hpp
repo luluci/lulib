@@ -14,9 +14,9 @@ namespace lulib { namespace win32api { namespace window {
 	LRESULT CALLBACK procedure(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		//boost::mpl::print< window::basic_window<char> > abc;
 		// window型
-		typedef window::basic_window<Char> window_type;
+		typedef basic_window<Char> window_type;
 		// Windowポリシー
-		typedef window::policy<Char> policy;
+		typedef policy<Char> policy;
 
 		// USERDATAを取得
 		LONG_PTR ptr = policy::get_window_long_ptr(hWnd, GWLP_USERDATA);

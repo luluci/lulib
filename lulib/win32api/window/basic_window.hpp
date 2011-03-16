@@ -38,7 +38,7 @@ namespace lulib { namespace win32api { namespace window {
 		typedef typename char_traits::string_type string_type;
 
 		// windowポリシー
-		typedef window::policy<TCHAR> policy;
+		typedef ::lulib::win32api::window::policy<Char> policy;
 
 		// ウィンドウプロシージャコールバック
 		typedef std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> procedure_type;
