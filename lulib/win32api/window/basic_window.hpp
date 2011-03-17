@@ -9,7 +9,7 @@
 #include <lulib/win32api/window/basic_window_class.hpp>
 #include <lulib/win32api/window/attributes_fwd.hpp>
 #include <lulib/win32api/window/policy.hpp>
-#include <lulib/win32api/menu_fwd.hpp>
+#include <lulib/win32api/menu/basic_menu_fwd.hpp>
 #include <lulib/win32api/exceptions.hpp>
 
 #include <lulib/type_traits/char_traits.hpp>
