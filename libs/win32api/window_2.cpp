@@ -48,37 +48,47 @@ public:
 
 	bool create(HINSTANCE hInst) {
 		// メニュー作成
+		namespace menu = lulib::win32api::menu;
 		menu_.reset( new menu_type() );
-		typedef menu_type::state state;
-		menu_->insert_item( wm::command::exit, "Exit");
+		*menu_ << menu::string(wm::command::exit, "Exit");
 
 		// タイトル操作メニュー
-		menu_->insert_submenu( wm::command::submenu_title, "タイトルの操作");
+		*menu_ << menu::submenu( wm::command::submenu_title, "タイトルの操作");
 		{
 			auto submenu = menu_->submenu(wm::command::submenu_title);
-			submenu->insert_item( wm::command::title_1, "タイトル-タイプZERO");
-			submenu->insert_item( wm::command::title_2, "Title-2");
-			submenu->insert_item( wm::command::title_3, "たいとる");
+			*submenu
+				<< menu::string( wm::command::title_1, "タイトル-タイプZERO")
+				<< menu::string( wm::command::title_2, "Title-2")
+				<< menu::string( wm::command::title_3, "たいとる")
+			;
 		}
 
 		// ウィンドウ位置メニュー
-		menu_->insert_submenu( wm::command::submenu_pos, "ウィンドウ位置の操作");
+		*menu_ << menu::submenu( wm::command::submenu_pos, "ウィンドウ位置の操作");
 		{
 			auto submenu = menu_->submenu(wm::command::submenu_pos);
-			submenu->insert_item( wm::command::pos_1, "右に+50");
-			submenu->insert_item( wm::command::pos_2, "左に+50");
-			submenu->insert_item( wm::command::pos_3, "下に+50");
-			submenu->insert_item( wm::command::pos_4, "(100,100)");
+			*submenu
+				<< menu::string( wm::command::pos_1, "右に+50")
+				<< menu::string( wm::command::pos_2, "左に+50")
+				<< menu::string( wm::command::pos_3, "下に+50")
+				<< menu::separator(wm::command::pos_3)  // wm::command::pos_3の後ろに挿入
+				<< menu::string( wm::command::pos_4, "(100,100)")
+				<< menu::hilite(wm::command::pos_4)
+			;
 		}
 
 		// ウィンドウサイズメニュー
-		menu_->insert_submenu( wm::command::submenu_size, "ウィンドウサイズの操作");
+		*menu_ << menu::submenu( wm::command::submenu_size, "ウィンドウサイズの操作");
 		{
 			auto submenu = menu_->submenu(wm::command::submenu_size);
-			submenu->insert_item( wm::command::size_1, "幅+50");
-			submenu->insert_item( wm::command::size_2, "幅-50");
-			submenu->insert_item( wm::command::size_3, "高さ+50");
-			submenu->insert_item( wm::command::size_4, "(400,100)");
+			*submenu
+				<< menu::string( wm::command::size_1, "幅+50")
+				<< menu::string( wm::command::size_2, "幅-50")
+				<< menu::string( wm::command::size_3, "高さ+50")
+				<< menu::separator(wm::command::size_3)  // wm::command::size_3の後ろに挿入
+				<< menu::string( wm::command::size_4, "(400,100)")
+				<< menu::multi(wm::command::size_4, menu::states::defitem | menu::states::checked)
+			;
 		}
 
 		// ウィンドウクラス作成
@@ -116,6 +126,7 @@ public:
 private:
 	void on_command(std::size_t id) {
 		namespace window = lulib::win32api::window;
+		namespace menu = lulib::win32api::menu;
 
 		switch (id) {
 			case wm::command::exit: {
@@ -125,23 +136,29 @@ private:
 			// Title
 			case wm::command::title_1: {
 				wnd_ << window::title("タイトル-タイプZERO");
-				menu_->set_checked(id);
-				menu_->set_enable(wm::command::title_2);
-				menu_->set_enable(wm::command::title_3);
+				*menu_
+					<< menu::checked(id)
+					<< menu::enable(wm::command::title_2)
+					<< menu::enable(wm::command::title_3)
+				;
 				break;
 			}
 			case wm::command::title_2: {
 				wnd_ << window::title("Title-2");
-				menu_->set_checked(id);
-				menu_->set_enable(wm::command::title_1);
-				menu_->set_enable(wm::command::title_3);
+				*menu_
+					<< menu::checked(id)
+					<< menu::enable(wm::command::title_1)
+					<< menu::enable(wm::command::title_3)
+				;
 				break;
 			}
 			case wm::command::title_3: {
 				wnd_ << window::title("たいとる");
-				menu_->set_checked(id);
-				menu_->set_enable(wm::command::title_1);
-				menu_->set_enable(wm::command::title_2);
+				*menu_
+					<< menu::checked(id)
+					<< menu::enable(wm::command::title_1)
+					<< menu::enable(wm::command::title_2)
+				;
 				break;
 			}
 			// position

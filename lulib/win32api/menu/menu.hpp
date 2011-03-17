@@ -2,6 +2,8 @@
 #pragma warning(disable : 4819)
 
 #include <lulib/win32api/menu/basic_menu.hpp>
+#include <lulib/win32api/menu/items.hpp>
+#include <lulib/win32api/menu/states.hpp>
 
 namespace lulib { namespace win32api { namespace menu {
 

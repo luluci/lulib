@@ -40,6 +40,8 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 			return &mii_;
 		}
 
+		// IDを取得
+		inline std::size_t id() { return mii_.wID; }
 		// ID属性を付与
 		self_type& id(std::size_t id) {
 			mii_.fMask |= mask::id;
@@ -49,13 +51,21 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 
 		// string属性を付与
 		self_type& string(char_type const* str) {
+			str_ = str;
 			mii_.fMask |= mask::string;
-			mii_.dwTypeData = const_cast<char_type*>(str);
+			mii_.dwTypeData = const_cast<char_type*>(str_.c_str());
 			return *this;
 		}
 		self_type& string(string_type const& str) {
+			str_ = str;
 			mii_.fMask |= mask::string;
-			mii_.dwTypeData = const_cast<char_type*>(str.c_str());
+			mii_.dwTypeData = const_cast<char_type*>(str_.c_str());
+			return *this;
+		}
+		self_type& string(string_type && str) {
+			str_ = std::move(str);
+			mii_.fMask |= mask::string;
+			mii_.dwTypeData = const_cast<char_type*>(str_.c_str());
 			return *this;
 		}
 
@@ -82,6 +92,7 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 
 	private:
 		menu_item_info_type mii_;
+		string_type str_;
 	};
 
 }}}}// namespace lulib::win32api::menu::detail

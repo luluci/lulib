@@ -9,6 +9,8 @@
 #include <type_traits>
 
 #include <lulib/win32api/menu/policy.hpp>
+#include <lulib/win32api/menu/items_fwd.hpp>
+#include <lulib/win32api/menu/states_fwd.hpp>
 #include <lulib/win32api/menu/detail/menu_item_info.hpp>
 #include <lulib/win32api/menu/detail/menu_item_type.hpp>
 #include <lulib/win32api/exceptions.hpp>
@@ -99,48 +101,10 @@ namespace lulib { namespace win32api { namespace menu {
 			return (::TrackPopupMenuEx(menu_ptr_.get(), flag, x, y, hWnd, NULL) == TRUE);
 		}
 
-		// 通常のテキストで表示されるテキストの挿入
-		bool insert_item(std::size_t id, char_type const* string) {
-			return insert_item(id, id, string);
-		}
-		bool insert_item(std::size_t idx, std::size_t id, char_type const* string) {
-			menu_item_info mii;
-			mii.id(id);
-			mii.string(string);
-			// メニューアイテムを挿入
-			return ( policy::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
-		}
-
-		// セパレータの挿入
-		bool insert_separator(std::size_t idx) {
-			menu_item_info mii;
-			mii.separator();
-			// セパレータを追加
-			return ( policy::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
-		}
-
-		// サブメニューアイテムを挿入
-		bool insert_submenu(std::size_t id, char_type const* string) {
-			return insert_submenu(id, id, string);
-		}
-		bool insert_submenu(std::size_t idx, std::size_t id, char_type const* string) {
-			menu_item_info mii;
-			mii.id(id);
-			mii.string(string);
-
-			// サブメニューハンドラを作成
-			auto result = c_.insert(
-				typename container::value_type(id, submenu_ptr( new submenu_type() ))
-			);
-			mii.submenu( *(result.first->second) );
-
-			// メニューアイテムを挿入
-			return ( policy::insert_menu_item(menu_ptr_.get(), idx, true, mii) == TRUE );
-		}
-
 		// stateを使う
-		typedef detail::state state;
+		//typedef detail::state state;
 		// 対象メニューアイテムの状態を変更
+		/*
 		bool set_state(std::size_t id, std::size_t s) {
 			// idを識別子として使用
 			return set_state(id, FALSE, s);
@@ -166,6 +130,40 @@ namespace lulib { namespace win32api { namespace menu {
 		bool set_defitem(std::size_t id) {
 			return set_state(id, FALSE, state::defitem);
 		}
+		*/
+
+	public:
+		// friend関数
+		// メニューアイテム
+		// 文字列メニューアイテム
+		template<HMENU (WINAPI *C)(), typename T>
+		friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, item::basic_string<T> &&);
+		// サブメニューアイテム
+		template<HMENU (WINAPI *C)(), typename T>
+		friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, item::basic_submenu<T> &&);
+		// セパレータアイテム
+		template<HMENU (WINAPI *C)(), typename T>
+		friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, item::separator &&);
+
+		// 状態
+		// 通常
+		template<HMENU (WINAPI *C)(), typename T>
+		friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::enable &&);
+		// 無効
+		template<HMENU (WINAPI *C)(), typename T>
+		friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::disabled &&);
+		// チェックマーク
+		template<HMENU (WINAPI *C)(), typename T>
+		friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::checked &&);
+		// ハイライト(選択状態になってる)
+		template<HMENU (WINAPI *C)(), typename T>
+		friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::hilite &&);
+		// デフォルト(太字になってる)
+		template<HMENU (WINAPI *C)(), typename T>
+		friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::defitem &&);
+		// 複合状態
+		template<HMENU (WINAPI *C)(), typename T>
+		friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::multi &&);
 
 	private:
 		// メニューハンドラ
