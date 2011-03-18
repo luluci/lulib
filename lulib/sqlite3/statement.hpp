@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef DEBUG
-#include <iostream>
-#endif
-
 #include <string>
 #include <functional>
 
@@ -78,22 +74,6 @@ namespace lulib { namespace sqlite3 {
 		//     2-3. reset() : ステートメントを再実行可能にする。
 		//                    bind_*()でバインドされたデータはクリアされない
 
-	private:
-		// SQLクエリをセットする
-		bool prepare(sqlite3_type *db, std::string const& query, int query_size) {
-			return prepare(db, query.c_str(), query_size);
-		}
-		bool prepare(sqlite3_type *db, char const* query, int query_size) {
-			statement_type *stmt = 0;
-			// prepare実行
-			error_code_ = ::sqlite3_prepare(db, query, -1, &stmt, 0);
-			stmt_.reset(stmt);
-			// prepareの結果を通知
-			return error_code_ == result_code::ok;
-		}
-
-	public:
-
 #ifdef _MSC_VER
 		// 非再帰的bind
 		template<typename T>
@@ -112,9 +92,22 @@ namespace lulib { namespace sqlite3 {
 		}
 #endif
 
-		// prepare, bindしたクエリを実行
+		// ステートメントを再実行可能にする
+		void reset() {
+			// bindの最初にはresetする
+			::sqlite3_reset(stmt_.get());
+		}
+
+		// prepare, bindしたクエリを実行(step())
+		// step()の結果、データが返されたらrowを返す
 		row step() {
 			step_state_ = ::sqlite3_step(stmt_.get());
+			return get_row();
+		}
+
+		// step()の結果のデータを取り出すrowクラスを返す
+		row get_row() {
+			// step()の結果、データを返していたら
 			if (has_row()) return row(stmt_.get());
 			else return row();
 		}
@@ -127,47 +120,27 @@ namespace lulib { namespace sqlite3 {
 		// step()がデータを返す場合、
 		// プロキシクラスrowをコールバックする
 		// ファンクタは、trueを返す間ループする、falseで終了
-		bool step(callback_type const& func) {
+		bool each(callback_type const& func) {
 			// result_code::rowを返す間、rowプロキシクラスをコールバック
-			while ( (step_state_ = step()) == result_code::row ) {
-				if ( !func( row(stmt_.get()) ) ) return false;
+			while ( row r = step() ) {
+				if ( !func(r) ) return false;
 			}
 			// ループ全完了
 			return true;
 		}
 
-		// ステートメントを再実行可能にする
-		void reset() {
-			// bindの最初にはresetする
-			::sqlite3_reset(stmt_.get());
+	private:
+		// SQLクエリをセットする
+		bool prepare(sqlite3_type *db, std::string const& query, int query_size) {
+			return prepare(db, query.c_str(), query_size);
 		}
-
-		// step()の結果のデータを取り出すrowクラスを返す
-		row get_row() {
-			// step()の結果、データを返していたら
-			if (step_state_ == result_code::row) {
-				return row(stmt_.get());
-			}
-			return row();
-		}
-
-		bool each_row(callback_type const& func) {
-			bool ret;
-
-			// この時点で、すでにstep()が(execute()で)一度呼ばれている前提
-			// step()の結果、データを返す限りループ
-			while (step_state_ == result_code::row) {
-				// funcにrowプロキシクラスを渡す
-				ret = func( row(stmt_.get()) );
-				// 現在のrowについて処理を行ったので、次のstep()
-				step();
-				// コールバック関数がfalseを返したので終了
-				if (!ret) return false;
-			}
-
-			//std::cout << "each_row():" << step_state_ << std::endl;
-			// 現在の状態を返して終了
-			return true;
+		bool prepare(sqlite3_type *db, char const* query, int query_size) {
+			statement_type *stmt = 0;
+			// prepare実行
+			error_code_ = ::sqlite3_prepare(db, query, -1, &stmt, 0);
+			stmt_.reset(stmt);
+			// prepareの結果を通知
+			return error_code_ == result_code::ok;
 		}
 
 	private:

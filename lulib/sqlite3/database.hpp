@@ -41,13 +41,7 @@ db.execute("SELECT * FROM my_table WHERE id=?", 2).each_row(
 
 */
 
-#ifdef DEBUG
-#include <iostream>
-#endif
-
 #include <string>
-
-#include <sqlite3.h>
 
 #include <lulib/sqlite3/statement.hpp>
 #include <lulib/sqlite3/detail/handler.hpp>
@@ -100,77 +94,6 @@ namespace lulib { namespace sqlite3 {
 		statement prepare(char const* query) {
 			return statement( db_.get(), query, -1 );
 		}
-
-		// execute
-		// 実行までを行う
-		/*
-#ifdef _MSC_VER
-		database& execute(std::string const& query) {
-			// prepareを行い、statementハンドルを更新
-			// 失敗したならfalse
-			//std::cout << "check1" << std::endl;
-			if (!prepare(query)) {
-				step_state_ == result_code::error; //return result_code::error;
-				return *this;
-			}
-			// statementを実行
-			step();
-
-			// 自分を返す
-			return *this;
-		}
-#endif
-#ifndef _MSC_VER
-		// SQLクエリを一括実行する関数群
-		//     execute("query", ...).each_row();と使うことを想定
-		// 返り値:
-		//     result_code::done : クエリの実行が完了している状態
-		//     result_code::row  : クエリの結果としてデータを返している(データを読み出せる)状態
-		template<typename... Args>
-		database& execute(std::string const& query, const Args&... args) {
-			return execute(query.c_str(), args...);
-		}
-		template<typename... Args>
-		database& execute(char const* query, const Args&... args) {
-			// prepareを行い、statementハンドルを更新
-			// 失敗したならfalse
-			if (!prepare(query)) {
-				step_state_ == result_code::error;
-				return *this;
-			}
-			// statementに引数をバインドする
-			if (!bind(args...)) {
-				step_state_ == result_code::error;
-				return *this;
-			}
-			// statementを実行
-			step();
-			// 自分を返す
-			return *this;
-		}
-#endif
-		int each_row(const callback_type& func) {
-			bool ret;
-
-			// この時点で、すでにstep()が(execute()で)一度呼ばれている前提
-			// step()の結果、データを返す限りループ
-			while (step_state_ == result_code::row) {
-				// funcにrowプロキシクラスを渡す
-				ret = func( row(stmt_.get()) );
-
-				// 現在のrowについて処理を行ったので、次のstep()
-				step();
-
-				// コールバック関数がfalseを返したので終了
-				if (!ret) break;
-			}
-
-			//std::cout << "each_row():" << step_state_ << std::endl;
-			// 現在の状態を返して終了
-			return step_state_;
-		}
-
-		*/
 
 	};
 
