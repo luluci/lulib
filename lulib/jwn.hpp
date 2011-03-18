@@ -21,18 +21,20 @@ namespace lulib {
 		struct lang {
 			enum enum_t {
 				jpn = 0,
-				eng = 1,
+				eng,
 				size,
+				null,
 			};
 		};
 		// pos enum
 		struct pos {
 			enum enum_t {
 				noun = 0,
-				verb = 1,
-				adj  = 2,
-				adv  = 3,
+				verb,
+				adj,
+				adv,
 				size,
+				null,
 			};
 		};
 		// link enum
@@ -66,7 +68,9 @@ namespace lulib {
 
 				// 独自拡張link
 				coor,      // coordinate
+				trans,     // 同じsynsetに属する他言語単語
 				size,
+				null,
 			};
 		};
 
@@ -96,7 +100,6 @@ namespace lulib {
 			pos_[pos::adv]  = "r";
 			// link
 			link_[link::syns] = "syns";
-			link_[link::coor] = "coor";
 			link_[link::hype] = "hype";
 			link_[link::hypo] = "hypo";
 			link_[link::also] = "also";
@@ -121,6 +124,9 @@ namespace lulib {
 			link_[link::mprt] = "mprt";
 			link_[link::msub] = "msub";
 			link_[link::sim] = "sim";
+			// ex link
+			link_[link::coor] = "coor";
+			link_[link::trans] = "trans";
 		}
 
 		inline bool open(const std::string &file) {
@@ -153,6 +159,9 @@ namespace lulib {
 				}
 				case link::coor: {
 					return coordinate(word, pos, lng, func);
+				}
+				case link::trans: {
+					return false;  // このインターフェースでは処理できないよ！
 				}
 				default: {
 					return get_word_by_link(word, lnk, pos, lng, func);
@@ -221,6 +230,35 @@ WHERE
 			return get_word_by_link(word, link::hypo, pos, lng, func);
 		}
 
+/*
+SELECT word.lemma
+FROM word, sense
+WHERE sense.synset IN (
+    SELECT sense.synset 
+    FROM word, sense 
+    WHERE word.lemma=?
+      AND word.pos=?
+      AND word.lang=?
+      AND sense.wordid = word.wordid
+)
+AND sense.wordid = word.wordid
+AND word.pos=?
+AND word.lang=?;
+*/
+		// 1. wordからwordidを取得
+		// 2. wordidが属するsynsetを取得
+		// 3. synsetに属する別のlangの単語を取得
+		bool translation(
+			std::string const& word,
+			pos::enum_t pos,
+			lang::enum_t src_lng,
+			lang::enum_t trg_lng,
+			callback_type const& func
+		) {
+			char const* query = "SELECT word.lemma FROM word, sense WHERE sense.synset IN ( SELECT sense.synset FROM word, sense WHERE word.lemma=? AND word.pos=? AND word.lang=? AND sense.wordid = word.wordid ) AND sense.wordid = word.wordid AND word.pos=? AND word.lang=?;";
+			return run_query_type_2(query, word, pos, src_lng, trg_lng, func);
+		}
+
 	private:
 
 /*
@@ -287,6 +325,37 @@ WHERE
 			}
 			// データをbind
 			bool result = stmt.bind(word, pos_[pos], lang_[lng], pos_[pos], lang_[lng]);
+			if (!result) {
+				return false;
+			}
+
+			// 返されるデータを参照
+			stmt.each( [&func](row_type const& row) -> bool {
+				// funcの返り値をそのまま返す
+				if (auto p = row.as_string(0)) return func( *p );
+				return false;
+			});
+
+			// 最後までループしてたらtrue
+			return stmt.is_done();
+		}
+
+		// "word, pos_[pos], lang_[src_lng], pos_[pos], lang_[trg_lng]"をbindするタイプのクエリを実行
+		bool run_query_type_2(
+			char const* query,
+			std::string const& word,
+			pos::enum_t pos,
+			lang::enum_t src_lng,
+			lang::enum_t trg_lng,
+			callback_type const& func
+		) {
+			// SQLクエリを実行
+			stmt_type stmt = db_.prepare(query);
+			if (!stmt) {
+				return false;
+			}
+			// データをbind
+			bool result = stmt.bind(word, pos_[pos], lang_[src_lng], pos_[pos], lang_[trg_lng]);
 			if (!result) {
 				return false;
 			}
