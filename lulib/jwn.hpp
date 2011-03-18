@@ -38,25 +38,45 @@ namespace lulib {
 		// link enum
 		struct link {
 			enum enum_t {
-				syns = 0,  // synonyms
+				also = 0,  // See also
+				ants,      // Antonyms
+				attr,      // Attributes
+				caus,      // Causes
+				dmnc,      // Domain --- Category
+				dmnr,      // Domain --- Region
+				dmnu,      // Domain --- Usage
+				dmtc,      // In Domain --- Category
+				dmtr,      // In Domain --- Region
+				dmtu,      // In Domain --- Usage
+				enta,      // Entails
+				hasi,      // Has Instance
+				hmem,      // Holonyms --- Member
+				holo,      // Holonyms
+				hprt,      // Holonyms --- Part
+				hsub,      // Holonyms --- Substance
+				hype,      // Hypernym
+				hypo,      // Hyponym
+				inst,      // Instances
+				mero,      // Meronyms
+				mmem,      // Meronyms --- Member
+				mprt,      // Meronyms --- Part
+				msub,      // Meronyms --- Substance
+				sim,       // Similar to
+				syns,      // Synonyms
+
+				// 独自拡張link
 				coor,      // coordinate
-				hype,      // hypernym
-				hypo,      // hyponym
 				size,
 			};
 		};
 
 	private:
-		typedef boost::array<std::string, lang::size> lang_array;
+		typedef boost::array<char const*, lang::size> lang_array;
 		lang_array lang_;
-		typedef boost::array<std::string, pos::size> pos_array;
+		typedef boost::array<char const*, pos::size> pos_array;
 		pos_array pos_;
-		typedef boost::array<std::string, link::size> link_array;
+		typedef boost::array<char const*, link::size> link_array;
 		link_array link_;
-
-		typedef std::list<int> int_list;
-		typedef std::list<std::string> str_list;
-		typedef std::list<double> double_list;
 
 	public:
 		jwn() : db_() {
@@ -79,6 +99,28 @@ namespace lulib {
 			link_[link::coor] = "coor";
 			link_[link::hype] = "hype";
 			link_[link::hypo] = "hypo";
+			link_[link::also] = "also";
+			link_[link::ants] = "ants";
+			link_[link::attr] = "attr";
+			link_[link::caus] = "caus";
+			link_[link::dmnc] = "dmnc";
+			link_[link::dmnr] = "dmnr";
+			link_[link::dmnu] = "dmnu";
+			link_[link::dmtc] = "dmtc";
+			link_[link::dmtr] = "dmtr";
+			link_[link::dmtu] = "dmtu";
+			link_[link::enta] = "enta";
+			link_[link::hasi] = "hasi";
+			link_[link::hmem] = "hmem";
+			link_[link::holo] = "holo";
+			link_[link::hprt] = "hprt";
+			link_[link::hsub] = "hsub";
+			link_[link::inst] = "inst";
+			link_[link::mero] = "mero";
+			link_[link::mmem] = "mmem";
+			link_[link::mprt] = "mprt";
+			link_[link::msub] = "msub";
+			link_[link::sim] = "sim";
 		}
 
 		inline bool open(const std::string &file) {
@@ -98,24 +140,22 @@ namespace lulib {
 		// 個別指定によるアクセス
 		bool operator()(
 			std::string const& word,
-			link::enum_t link,
+			link::enum_t lnk,
 			pos::enum_t pos,
 			lang::enum_t lng,
 			callback_type const& func
 		) {
 			// linkで分岐
-			switch (link) {
+			// synsとcoorは別個のクエリ
+			switch (lnk) {
 				case link::syns: {
 					return synonym(word, pos, lng, func);
 				}
 				case link::coor: {
 					return coordinate(word, pos, lng, func);
 				}
-				case link::hype: {
-					return hypernym(word, pos, lng, func);
-				}
-				case link::hypo: {
-					return hyponym(word, pos, lng, func);
+				default: {
+					return get_word_by_link(word, lnk, pos, lng, func);
 				}
 			}
 			return false;
@@ -174,53 +214,64 @@ WHERE
 			return run_query_type_1(query, word, pos, lng, func);
 		}
 
-/*
-SELECT word.lemma
-FROM word, sense
-WHERE
-    sense.synset IN (
-        SELECT synlink.synset2
-        FROM word, sense, synlink
-        WHERE word.lemma = ?
-            AND word.pos = ?
-            AND word.lang = ?
-            AND sense.wordid = word.wordid
-            AND synlink.synset1 = sense.synset
-            AND synlink.link = 'hype'
-    )
-    AND word.wordid = sense.wordid
-    AND word.pos = ?
-    AND word.lang = ?;
-*/
 		bool hypernym(std::string const& word, pos::enum_t pos, lang::enum_t lng, callback_type const& func) {
-			char const* query = "SELECT word.lemma FROM word, sense WHERE sense.synset IN ( SELECT synlink.synset2 FROM word, sense, synlink WHERE word.lemma=? AND word.pos=? AND word.lang=? AND sense.wordid = word.wordid AND synlink.synset1 = sense.synset AND synlink.link = 'hype' ) AND word.wordid = sense.wordid AND word.pos=? AND word.lang=?;";
-			return run_query_type_1(query, word, pos, lng, func);
+			return get_word_by_link(word, link::hype, pos, lng, func);
 		}
-
-/*
-SELECT word.lemma
-FROM word, sense
-WHERE
-    sense.synset IN (
-        SELECT synlink.synset2
-        FROM word, sense, synlink
-        WHERE word.lemma = ?
-            AND word.pos = ?
-            AND word.lang = ?
-            AND sense.wordid = word.wordid
-            AND synlink.synset1 = sense.synset
-            AND synlink.link = 'hypo'
-    )
-    AND word.wordid = sense.wordid
-    AND word.pos = ?
-    AND word.lang = ?;
-*/
 		bool hyponym(std::string const& word, pos::enum_t pos, lang::enum_t lng, callback_type const& func) {
-			char const* query = "SELECT word.lemma FROM word, sense WHERE sense.synset IN ( SELECT synlink.synset2 FROM word, sense, synlink WHERE word.lemma=? AND word.pos=? AND word.lang=? AND sense.wordid = word.wordid AND synlink.synset1 = sense.synset AND synlink.link = 'hypo' ) AND word.wordid = sense.wordid AND word.pos=? AND word.lang=?;";
-			return run_query_type_1(query, word, pos, lng, func);
+			return get_word_by_link(word, link::hypo, pos, lng, func);
 		}
 
 	private:
+
+/*
+SELECT word.lemma
+FROM word, sense
+WHERE
+    sense.synset IN (
+        SELECT synlink.synset2
+        FROM word, sense, synlink
+        WHERE word.lemma = ?
+            AND word.pos = ?
+            AND word.lang = ?
+            AND sense.wordid = word.wordid
+            AND synlink.synset1 = sense.synset
+            AND synlink.link = ?
+    )
+    AND word.wordid = sense.wordid
+    AND word.pos = ?
+    AND word.lang = ?;
+*/
+		// wordと、linkで関係する語をコールバック
+		bool get_word_by_link(
+			std::string const& word,
+			link::enum_t lnk,
+			pos::enum_t pos,
+			lang::enum_t lng,
+			callback_type const& func
+		) {
+			char const* query = "SELECT word.lemma FROM word, sense WHERE sense.synset IN ( SELECT synlink.synset2 FROM word, sense, synlink WHERE word.lemma=? AND word.pos=? AND word.lang=? AND sense.wordid = word.wordid AND synlink.synset1 = sense.synset AND synlink.link=? ) AND word.wordid = sense.wordid AND word.pos=? AND word.lang=?;";
+			// SQLクエリを実行
+			stmt_type stmt = db_.prepare(query);
+			if (!stmt) {
+				return false;
+			}
+			// データをbind
+			bool result = stmt.bind(word, pos_[pos], lang_[lng], link_[lnk], pos_[pos], lang_[lng]);
+			if (!result) {
+				return false;
+			}
+
+			// 返されるデータを参照
+			stmt.each( [&func](row_type const& row) -> bool {
+				// funcの返り値をそのまま返す
+				if (auto p = row.as_string(0)) return func( *p );
+				return false;
+			});
+
+			// 最後までループしてたらtrue
+			return stmt.is_done();
+		}
+
 		// "word, pos_[pos], lang_[lng], pos_[pos], lang_[lng]"をbindするタイプのクエリを実行
 		bool run_query_type_1(
 			char const* query,
