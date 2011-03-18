@@ -1,8 +1,6 @@
 
 #include <iostream>
 
-#include <boost/filesystem/operations.hpp>
-
 #include <lulib/jwn.hpp>
 
 int main(int argc, char **argv) {
@@ -15,17 +13,6 @@ int main(int argc, char **argv) {
 	typedef lulib::jwn jwn;
 
 	std::string jwn_path = argv[1];
-
-	// ファイル存在チェック
-	{
-		namespace fs = boost::filesystem;
-		fs::path p(jwn_path);
-		if (!fs::exists(p)) {
-			std::cerr << "jwn file(" << jwn_path << ") not exists." << std::endl;
-			return 1;
-		}
-	}
-
 	jwn wn(jwn_path);  // 日本語WordNet dbファイルまでのパス
 	if (!wn.is_open()) {
 		std::cerr << "cannot open sqlite3 db file" << std::endl;
