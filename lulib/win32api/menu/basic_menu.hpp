@@ -121,28 +121,28 @@ namespace lulib { namespace win32api {
 			// 通常
 			typedef state::enable enable;
 			template<HMENU (WINAPI *C)(), typename T>
-			friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::enable &&);
+			friend basic_menu<C,T>& state::operator<<(basic_menu<C,T>&, state::enable &&);
 			// 無効
 			typedef state::disabled disabled;
 			template<HMENU (WINAPI *C)(), typename T>
-			friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::disabled &&);
+			friend basic_menu<C,T>& state::operator<<(basic_menu<C,T>&, state::disabled &&);
 			// チェックマーク
 			typedef state::checked checked;
 			template<HMENU (WINAPI *C)(), typename T>
-			friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::checked &&);
+			friend basic_menu<C,T>& state::operator<<(basic_menu<C,T>&, state::checked &&);
 			// ハイライト(選択状態になってる)
 			typedef state::hilite hilite;
 			template<HMENU (WINAPI *C)(), typename T>
-			friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::hilite &&);
+			friend basic_menu<C,T>& state::operator<<(basic_menu<C,T>&, state::hilite &&);
 			// デフォルト(太字になってる)
 			typedef state::defitem defitem;
 			template<HMENU (WINAPI *C)(), typename T>
-			friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::defitem &&);
+			friend basic_menu<C,T>& state::operator<<(basic_menu<C,T>&, state::defitem &&);
 			// 複合状態
 			typedef item_type::state states;
 			typedef state::multi multi;
 			template<HMENU (WINAPI *C)(), typename T>
-			friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, state::multi &&);
+			friend basic_menu<C,T>& state::operator<<(basic_menu<C,T>&, state::multi &&);
 
 		private:
 			// メニューハンドラ
