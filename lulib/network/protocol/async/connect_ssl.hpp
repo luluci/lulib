@@ -1,82 +1,76 @@
 #pragma once
 
-namespace lulib {
-	namespace network {
-		namespace protocol {
-			namespace async {
+namespace lulib { namespace network { namespace protocol { namespace async {
 
-				// io_service‚Éasync_read‚ğƒZƒbƒg‚·‚é
-				template<typename Protocol, typename EndpointIterator, typename Success, typename Failure>
-				void connect_ssl(Protocol &p, EndpointIterator &it, Success const& success, Failure const& failure) {
-					// ƒvƒƒgƒRƒ‹‚ª•Â‚¶‚Ä‚¢‚½‚çI—¹
-					if (!p) return;
+	// io_serviceã«async_readã‚’ã‚»ãƒƒãƒˆã™ã‚‹
+	template<typename Protocol, typename EndpointIterator, typename Success, typename Failure>
+	void connect_ssl(Protocol &p, EndpointIterator &it, Success const& success, Failure const& failure) {
+		// ãƒ—ãƒ­ãƒˆã‚³ãƒ«ãŒé–‰ã˜ã¦ã„ãŸã‚‰çµ‚äº†
+		if (!p) return;
 
-					// endpoint‚Ì‰ğŒˆ‚ğŠJn
-					p.socket().lowest_layer().async_connect( *it,
-						[&](boost::system::error_code const& error) {
-							detail::connect_ssl_handle(error, p, ++it, success, failure);
-						}
-					);
+		// endpointã®è§£æ±ºã‚’é–‹å§‹
+		p.socket().lowest_layer().async_connect( *it,
+			[&](boost::system::error_code const& error) {
+				detail::connect_ssl_handle(error, p, ++it, success, failure);
+			}
+		);
 
+	}
+
+	namespace detail {
+		template<typename Protocol, typename EndpointIterator, typename Success, typename Failure>
+		void connect_ssl_handle(
+			boost::system::error_code const& error,
+			Protocol &p,
+			EndpointIterator &it,
+			Success const& success, Failure const& failure
+		) {
+			// ãƒ—ãƒ­ãƒˆã‚³ãƒ«ãŒé–‰ã˜ã¦ã„ãŸã‚‰çµ‚äº†
+			if (!p) return;
+
+			// connectã«æˆåŠŸã—ãŸ
+			if (!error) {
+				// handshakeã«ç§»ã‚‹
+				handshake(p, success, failure);
+			}
+			// connectã«å¤±æ•—ã—ãŸ
+			// ã‹ã¤ã€endpoint_iteratorãŒçµ‚ç«¯ã«é”ã—ã¦ã„ãªã„ãªã‚‰ã€å†å¸°å‡¦ç†
+			else if (it != EndpointIterator()) {
+				// å¤±æ•—ã—ãŸæ¥ç¶šã‚’é–‰ã˜ã‚‹
+				p.socket().lowest_layer().close();
+				// ãƒªãƒˆãƒ©ã‚¤
+				p.socket().lowest_layer().async_connect( *it,
+					[&](boost::system::error_code const& error) {
+						connect_ssl_handle(error, p, ++it, success, failure);
+					}
+				);
+			}
+			// çµ‚ç«¯ã«é”ã—ã¦ã„ãŸã‚‰ã€å¤±æ•—
+			else {
+				failure();
+			}
+		}
+
+		template<typename Protocol, typename Success, typename Failure>
+		void handshake(Protocol &p, Success const& success, Failure const& failure) {
+			// ãƒ—ãƒ­ãƒˆã‚³ãƒ«ãŒé–‰ã˜ã¦ã„ãŸã‚‰çµ‚äº†
+			if (!p) return;
+
+			p.socket().async_handshake( boost::asio::ssl::stream_base::client,
+				[&](boost::system::error_code const& error) {
+					// handshakeã«æˆåŠŸ
+					if (!error) {
+						success();
+					}
+					// å¤±æ•—
+					else {
+						failure();
+					}
 				}
+			);
 
-				namespace detail {
-					template<typename Protocol, typename EndpointIterator, typename Success, typename Failure>
-					void connect_ssl_handle(
-						boost::system::error_code const& error,
-						Protocol &p,
-						EndpointIterator &it,
-						Success const& success, Failure const& failure
-					) {
-						// ƒvƒƒgƒRƒ‹‚ª•Â‚¶‚Ä‚¢‚½‚çI—¹
-						if (!p) return;
+			return;
+		}
+	}//namespace detail
 
-						// connect‚É¬Œ÷‚µ‚½
-						if (!error) {
-							// handshake‚ÉˆÚ‚é
-							handshake(p, success, failure);
-						}
-						// connect‚É¸”s‚µ‚½
-						// ‚©‚ÂAendpoint_iterator‚ªI’[‚É’B‚µ‚Ä‚¢‚È‚¢‚È‚çAÄ‹Aˆ—
-						else if (it != EndpointIterator()) {
-							// ¸”s‚µ‚½Ú‘±‚ğ•Â‚¶‚é
-							p.socket().lowest_layer().close();
-							// ƒŠƒgƒ‰ƒC
-							p.socket().lowest_layer().async_connect( *it,
-								[&](boost::system::error_code const& error) {
-									connect_ssl_handle(error, p, ++it, success, failure);
-								}
-							);
-						}
-						// I’[‚É’B‚µ‚Ä‚¢‚½‚çA¸”s
-						else {
-							failure();
-						}
-					}
-
-					template<typename Protocol, typename Success, typename Failure>
-					void handshake(Protocol &p, Success const& success, Failure const& failure) {
-						// ƒvƒƒgƒRƒ‹‚ª•Â‚¶‚Ä‚¢‚½‚çI—¹
-						if (!p) return;
-
-						p.socket().async_handshake( boost::asio::ssl::stream_base::client,
-							[&](boost::system::error_code const& error) {
-								// handshake‚É¬Œ÷
-								if (!error) {
-									success();
-								}
-								// ¸”s
-								else {
-									failure();
-								}
-							}
-						);
-
-						return;
-					}
-				}//namespace detail
-
-			}//namespace async
-		}//namespace protocol
-	}//namespace network
-}//namespace lulib
+}}}}//namespace lulib::network::protocol::async

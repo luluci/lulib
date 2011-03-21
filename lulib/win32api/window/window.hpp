@@ -3,10 +3,8 @@
 
 #include <lulib/win32api/window/basic_window_class.hpp>
 #include <lulib/win32api/window/basic_window.hpp>
-#include <lulib/win32api/window/attributes.hpp>
-#include <lulib/win32api/window/procedure.hpp>
 
-namespace lulib { namespace win32api { namespace window {
+namespace lulib { namespace win32api {
 
 	// Unicodeフラグ(TCHAR)に依存したデフォルトウィンドウクラス型
 	typedef basic_window_class<>        window_class;
@@ -22,4 +20,4 @@ namespace lulib { namespace win32api { namespace window {
 	// ワイド文字ウィンドウ型
 	typedef basic_window<wchar_t> window_w;
 
-}}}// namespace lulib::win32api::window
+}}// namespace lulib::win32api

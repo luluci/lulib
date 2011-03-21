@@ -2,61 +2,55 @@
 
 #include <boost/asio/streambuf.hpp>
 
-namespace lulib {
-	namespace network {
-		namespace protocol {
-			namespace async {
+namespace lulib { namespace network { namespace protocol { namespace async {
 
-				// io_service‚Éasync_read‚ğƒZƒbƒg‚·‚é
-				template<typename Protocol, typename EndpointIterator, typename Success, typename Failure>
-				void connect(Protocol &p, EndpointIterator &it, Success const& success, Failure const& failure) {
-					// ƒvƒƒgƒRƒ‹‚ª•Â‚¶‚Ä‚¢‚½‚çI—¹
-					if (!p) return;
+	// io_serviceã«async_readã‚’ã‚»ãƒƒãƒˆã™ã‚‹
+	template<typename Protocol, typename EndpointIterator, typename Success, typename Failure>
+	void connect(Protocol &p, EndpointIterator &it, Success const& success, Failure const& failure) {
+		// ãƒ—ãƒ­ãƒˆã‚³ãƒ«ãŒé–‰ã˜ã¦ã„ãŸã‚‰çµ‚äº†
+		if (!p) return;
 
-					// endpoint‚Ì‰ğŒˆ‚ğŠJn
-					p.socket().async_connect( *it,
-						[&](boost::system::error_code const& error) {
-							detail::connect_handle(error, p, ++it, success, failure);
-						}
-					);
+		// endpointã®è§£æ±ºã‚’é–‹å§‹
+		p.socket().async_connect( *it,
+			[&](boost::system::error_code const& error) {
+				detail::connect_handle(error, p, ++it, success, failure);
+			}
+		);
 
-				}
+	}
 
-				namespace detail {
-					template<typename Protocol, typename EndpointIterator, typename Success, typename Failure>
-					void connect_handle(
-						boost::system::error_code const& error,
-						Protocol &p,
-						EndpointIterator &it,
-						Success const& success, Failure const& failure
-					) {
-						// ƒvƒƒgƒRƒ‹‚ª•Â‚¶‚Ä‚¢‚½‚çI—¹
-						if (!p) return;
+	namespace detail {
+		template<typename Protocol, typename EndpointIterator, typename Success, typename Failure>
+		void connect_handle(
+			boost::system::error_code const& error,
+			Protocol &p,
+			EndpointIterator &it,
+			Success const& success, Failure const& failure
+		) {
+			// ãƒ—ãƒ­ãƒˆã‚³ãƒ«ãŒé–‰ã˜ã¦ã„ãŸã‚‰çµ‚äº†
+			if (!p) return;
 
-						// connect‚É¬Œ÷‚µ‚½
-						if (!error) {
-							success();
-						}
-						// connect‚É¸”s‚µ‚½
-						// ‚©‚ÂAendpoint_iterator‚ªI’[‚É’B‚µ‚Ä‚¢‚È‚¢‚È‚çAÄ‹Aˆ—
-						else if (it != EndpointIterator()) {
-							// ¸”s‚µ‚½Ú‘±‚ğ•Â‚¶‚é
-							p.socket().close();
-							// ƒŠƒgƒ‰ƒC
-							p.socket().async_connect( *it,
-								[&](boost::system::error_code const& error) {
-									connect_handle(error, p, ++it, success, failure);
-								}
-							);
-						}
-						// I’[‚É’B‚µ‚Ä‚¢‚½‚çA¸”s
-						else {
-							failure();
-						}
+			// connectã«æˆåŠŸã—ãŸ
+			if (!error) {
+				success();
+			}
+			// connectã«å¤±æ•—ã—ãŸ
+			// ã‹ã¤ã€endpoint_iteratorãŒçµ‚ç«¯ã«é”ã—ã¦ã„ãªã„ãªã‚‰ã€å†å¸°å‡¦ç†
+			else if (it != EndpointIterator()) {
+				// å¤±æ•—ã—ãŸæ¥ç¶šã‚’é–‰ã˜ã‚‹
+				p.socket().close();
+				// ãƒªãƒˆãƒ©ã‚¤
+				p.socket().async_connect( *it,
+					[&](boost::system::error_code const& error) {
+						connect_handle(error, p, ++it, success, failure);
 					}
-				}//namespace detail
+				);
+			}
+			// çµ‚ç«¯ã«é”ã—ã¦ã„ãŸã‚‰ã€å¤±æ•—
+			else {
+				failure();
+			}
+		}
+	}//namespace detail
 
-			}//namespace async
-		}//namespace protocol
-	}//namespace network
-}//namespace lulib
+}}}}//namespace lulib::network::protocol::async

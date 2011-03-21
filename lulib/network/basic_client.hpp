@@ -45,12 +45,6 @@ namespace lulib {
 				// メソッド
 				Method
 			) {
-				/*
-				if ( !protocol_.connect_async(host, timeout) ) return false;
-				if ( !protocol_.write_async(host, file, http_header, option, timeout, Method()) ) return false;
-				if ( !protocol_.read_async(status_code, header, body, timeout) ) return false;
-				return true;
-				*/
 				return protocol_(host, file, http_header, option, status_code, header, body, timeout, Method());
 			}
 
