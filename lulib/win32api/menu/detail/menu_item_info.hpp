@@ -1,11 +1,11 @@
 #pragma once
 #pragma warning(disable : 4819)
 
-#include <lulib/win32api/menu/policy.hpp>
+#include <lulib/win32api/menu/detail/policy.hpp>
 #include <lulib/win32api/menu/detail/menu_item_type.hpp>
 #include <lulib/type_traits/char_traits.hpp>
 
-namespace lulib { namespace win32api { namespace menu { namespace detail {
+namespace lulib { namespace win32api { namespace menu_detail {
 
 	template<typename Char = TCHAR>
 	class basic_menu_item_info {
@@ -17,7 +17,7 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 		typedef typename char_traits::string_type string_type;
 
 		// Menuポリシー
-		typedef ::lulib::win32api::menu::policy<Char> policy;
+		typedef ::lulib::win32api::menu_detail::policy<Char> policy;
 		typedef typename policy::menu_item_info_type menu_item_info_type;
 
 	public:
@@ -44,7 +44,7 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 		inline std::size_t id() { return mii_.wID; }
 		// ID属性を付与
 		self_type& id(std::size_t id) {
-			mii_.fMask |= mask::id;
+			mii_.fMask |= item_type::mask::id;
 			mii_.wID = id;
 			return *this;
 		}
@@ -52,40 +52,40 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 		// string属性を付与
 		self_type& string(char_type const* str) {
 			str_ = str;
-			mii_.fMask |= mask::string;
+			mii_.fMask |= item_type::mask::string;
 			mii_.dwTypeData = const_cast<char_type*>(str_.c_str());
 			return *this;
 		}
 		self_type& string(string_type const& str) {
 			str_ = str;
-			mii_.fMask |= mask::string;
+			mii_.fMask |= item_type::mask::string;
 			mii_.dwTypeData = const_cast<char_type*>(str_.c_str());
 			return *this;
 		}
 		self_type& string(string_type && str) {
 			str_ = std::move(str);
-			mii_.fMask |= mask::string;
+			mii_.fMask |= item_type::mask::string;
 			mii_.dwTypeData = const_cast<char_type*>(str_.c_str());
 			return *this;
 		}
 
 		// submenuを付与
 		self_type& submenu(HMENU hMenu) {
-			mii_.fMask |= mask::submenu;
+			mii_.fMask |= item_type::mask::submenu;
 			mii_.hSubMenu = hMenu;
 			return *this;
 		}
 
 		// separatorを付与
 		self_type& separator() {
-			mii_.fMask |= mask::ftype;
-			mii_.fType = ftype::separator;
+			mii_.fMask |= item_type::mask::ftype;
+			mii_.fType = item_type::ftype::separator;
 			return *this;
 		}
 
 		// stateを付与
 		self_type& state(std::size_t s) {
-			mii_.fMask |= mask::state;
+			mii_.fMask |= item_type::mask::state;
 			mii_.fState = s;
 			return *this;
 		}
@@ -95,4 +95,4 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 		string_type str_;
 	};
 
-}}}}// namespace lulib::win32api::menu::detail
+}}}// namespace lulib::win32api::menu_detail

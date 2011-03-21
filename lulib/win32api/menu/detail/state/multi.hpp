@@ -2,13 +2,13 @@
 #pragma warning(disable : 4819)
 
 #include <lulib/win32api/menu/basic_menu_fwd.hpp>
+#include <lulib/win32api/menu/detail/policy.hpp>
 #include <lulib/win32api/menu/detail/menu_item_info.hpp>
 #include <lulib/win32api/menu/detail/menu_item_type.hpp>
-#include <lulib/win32api/menu/policy.hpp>
 
 #include <lulib/win32api/exceptions.hpp>
 
-namespace lulib { namespace win32api { namespace menu { namespace state {
+namespace lulib { namespace win32api { namespace menu_detail { namespace state {
 
 	struct multi {
 
@@ -27,7 +27,7 @@ namespace lulib { namespace win32api { namespace menu { namespace state {
 	template<HMENU (WINAPI *T)(), typename Char>
 	basic_menu<T,Char>& operator<<(basic_menu<T,Char>& menu, multi &&s) {
 		// MenuItemInfo型
-		typedef detail::basic_menu_item_info<Char> menu_item_info;
+		typedef basic_menu_item_info<Char> menu_item_info;
 		// MenuItemInfo
 		menu_item_info mii;
 		mii.state( s.state_ );
@@ -38,4 +38,4 @@ namespace lulib { namespace win32api { namespace menu { namespace state {
 		return menu;
 	}
 
-}}}}// namespace lulib::win32api::menu::state
+}}}}// namespace lulib::win32api::menu_detail::state

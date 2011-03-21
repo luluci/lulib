@@ -2,9 +2,8 @@
 #pragma warning(disable : 4819)
 
 #include <windows.h>
-#include <string>
 
-namespace lulib { namespace win32api { namespace menu {
+namespace lulib { namespace win32api { namespace menu_detail {
 
 	// Menuポリシー
 	template<typename Char>
@@ -62,4 +61,4 @@ namespace lulib { namespace win32api { namespace menu {
 		}
 	};
 
-}}}// namespace lulib::win32api::menu::detail
+}}}// namespace lulib::win32api::menu_detail

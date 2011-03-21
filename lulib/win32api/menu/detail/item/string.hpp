@@ -2,15 +2,15 @@
 #pragma warning(disable : 4819)
 
 #include <lulib/win32api/menu/basic_menu_fwd.hpp>
+#include <lulib/win32api/menu/detail/policy.hpp>
 #include <lulib/win32api/menu/detail/menu_item_info.hpp>
 #include <lulib/win32api/menu/detail/menu_item_type.hpp>
-#include <lulib/win32api/menu/policy.hpp>
 
 #include <lulib/win32api/exceptions.hpp>
 
 #include <lulib/type_traits/char_traits.hpp>
 
-namespace lulib { namespace win32api { namespace menu { namespace item {
+namespace lulib { namespace win32api { namespace menu_detail { namespace item {
 
 	template<typename Char = TCHAR>
 	struct basic_string {
@@ -19,7 +19,7 @@ namespace lulib { namespace win32api { namespace menu { namespace item {
 		typedef typename char_traits::char_type   char_type;
 		typedef typename char_traits::string_type string_type;
 		// MenuItemInfo型
-		typedef detail::basic_menu_item_info<Char> menu_item_info;
+		typedef basic_menu_item_info<Char> menu_item_info;
 
 	public:
 		basic_string(std::size_t id, char_type const* str) : mii_(), idx_(id) {
@@ -65,4 +65,4 @@ namespace lulib { namespace win32api { namespace menu { namespace item {
 		return menu;
 	}
 
-}}}}// namespace lulib::win32api::menu::item
+}}}}// namespace lulib::win32api::menu_detail::item

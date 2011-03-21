@@ -3,7 +3,7 @@
 
 #include <windows.h>
 
-namespace lulib { namespace win32api { namespace menu { namespace detail {
+namespace lulib { namespace win32api { namespace menu_detail { namespace item_type {
 
 	// mask
 	struct mask {
@@ -47,4 +47,4 @@ namespace lulib { namespace win32api { namespace menu { namespace detail {
 	};
 
 
-}}}}// namespace lulib::win32api::menu::detail
+}}}}// namespace lulib::win32api::menu_detail::item_type

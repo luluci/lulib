@@ -52,7 +52,7 @@ namespace lulib { namespace win32api {
 #endif
 
 			// Menu型
-			typedef menu::basic_menu< ::CreateMenu, Char > menu_type;
+			typedef menu_detail::basic_menu< ::CreateMenu, Char > menu_type;
 			typedef std::shared_ptr<menu_type> menu_ptr;
 
 		public:

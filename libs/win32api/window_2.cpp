@@ -40,22 +40,21 @@ class my_window {
 	typedef lulib::win32api::window window;
 
 	// メニュー型
-	typedef lulib::win32api::menu::menu menu_type;
-	typedef std::shared_ptr<menu_type> menu_ptr;
+	typedef lulib::win32api::menu menu;
+	typedef std::shared_ptr<menu> menu_ptr;
 
 public:
 	my_window() {}
 
 	bool create(HINSTANCE hInst) {
 		// メニュー作成
-		namespace menu = lulib::win32api::menu;
-		menu_.reset( new menu_type() );
+		menu_.reset( new menu() );
 		*menu_ << menu::string(wm::command::exit, "Exit");
 
 		// タイトル操作メニュー
 		*menu_ << menu::submenu( wm::command::submenu_title, "タイトルの操作");
 		{
-			auto submenu = menu_->submenu(wm::command::submenu_title);
+			auto submenu = menu_->get_submenu(wm::command::submenu_title);
 			*submenu
 				<< menu::string( wm::command::title_1, "タイトル-タイプZERO")
 				<< menu::string( wm::command::title_2, "Title-2")
@@ -66,7 +65,7 @@ public:
 		// ウィンドウ位置メニュー
 		*menu_ << menu::submenu( wm::command::submenu_pos, "ウィンドウ位置の操作");
 		{
-			auto submenu = menu_->submenu(wm::command::submenu_pos);
+			auto submenu = menu_->get_submenu(wm::command::submenu_pos);
 			*submenu
 				<< menu::string( wm::command::pos_1, "右に+50")
 				<< menu::string( wm::command::pos_2, "左に+50")
@@ -80,7 +79,7 @@ public:
 		// ウィンドウサイズメニュー
 		*menu_ << menu::submenu( wm::command::submenu_size, "ウィンドウサイズの操作");
 		{
-			auto submenu = menu_->submenu(wm::command::submenu_size);
+			auto submenu = menu_->get_submenu(wm::command::submenu_size);
 			*submenu
 				<< menu::string( wm::command::size_1, "幅+50")
 				<< menu::string( wm::command::size_2, "幅-50")
@@ -124,7 +123,6 @@ public:
 
 private:
 	void on_command(std::size_t id) {
-		namespace menu = lulib::win32api::menu;
 
 		switch (id) {
 			case wm::command::exit: {

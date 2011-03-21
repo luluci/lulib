@@ -2,10 +2,8 @@
 #pragma warning(disable : 4819)
 
 #include <lulib/win32api/menu/basic_menu.hpp>
-#include <lulib/win32api/menu/items.hpp>
-#include <lulib/win32api/menu/states.hpp>
 
-namespace lulib { namespace win32api { namespace menu {
+namespace lulib { namespace win32api {
 
 	// Unicodeフラグ(TCHAR)に依存したデフォルトメニュー型
 	typedef basic_menu< ::CreateMenu >            menu;
@@ -19,4 +17,4 @@ namespace lulib { namespace win32api { namespace menu {
 	typedef basic_menu< ::CreateMenu,      wchar_t >       menu_w;
 	typedef basic_menu< ::CreatePopupMenu, wchar_t > popup_menu_w;
 
-}}}// namespace lulib::win32api::menu
+}}// namespace lulib::win32api
