@@ -36,8 +36,8 @@ struct wm {
 
 class my_window {
 	// ウィンドウ型
-	typedef lulib::win32api::window::window_class window_class_type;
-	typedef lulib::win32api::window::window window_type;
+	typedef lulib::win32api::window_class window_class;
+	typedef lulib::win32api::window window;
 
 	// メニュー型
 	typedef lulib::win32api::menu::menu menu_type;
@@ -92,10 +92,10 @@ public:
 		}
 
 		// ウィンドウクラス作成
-		window_class_type wnd_class;
+		window_class wnd_class;
 		wnd_class.instance(hInst);
 		wnd_class.class_name("my_window_class_1");
-		wnd_class.style( window_class_type::styles::h_redraw | window_class_type::styles::h_redraw );
+		wnd_class.style( window_class::styles::h_redraw | window_class::styles::h_redraw );
 		wnd_class.background( (HBRUSH)(COLOR_WINDOW+1) );
 		wnd_class.icon(NULL);
 		wnd_class.icon_small(NULL);
@@ -107,7 +107,6 @@ public:
 		using std::placeholders::_2;
 		using std::placeholders::_3;
 		using std::placeholders::_4;
-		namespace window = lulib::win32api::window;
 		// ウィンドウ作成
 		wnd_.class_name(wnd_class);
 		wnd_.instance(hInst);
@@ -125,7 +124,6 @@ public:
 
 private:
 	void on_command(std::size_t id) {
-		namespace window = lulib::win32api::window;
 		namespace menu = lulib::win32api::menu;
 
 		switch (id) {
@@ -218,7 +216,7 @@ private:
 	}
 
 private:
-	window_type wnd_;
+	window wnd_;
 	menu_ptr menu_;
 };
 
