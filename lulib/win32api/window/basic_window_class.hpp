@@ -30,8 +30,11 @@ namespace lulib { namespace win32api {
 				init();
 			}
 
+			inline ATOM atom() { return atom_; }
+
 			bool register_class() {
-				return ( policy::register_class(&wc_) != 0 );
+				atom_ = policy::register_class(&wc_);
+				return ( atom_ != 0 );
 			}
 
 			// Default
@@ -102,6 +105,7 @@ namespace lulib { namespace win32api {
 		private:
 			wnd_class wc_;
 			string_type class_name_;
+			ATOM atom_;  // 登録したWindowClassを一意に識別するアトム
 		};
 
 	}// namespace lulib::win32api::window_detail

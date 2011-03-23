@@ -66,6 +66,8 @@ namespace lulib { namespace win32api {
 			inline operator HWND() {
 				return wnd_ptr_.get();
 			}
+			// 親ウィンドウハンドルを返す
+			//inline HWND get_parent() { return hParent_; }
 
 		private:
 			basic_window(basic_window const&);
@@ -120,38 +122,36 @@ namespace lulib { namespace win32api {
 				return true;
 			}
 
-			// ウィンドウクラスのセット
-			inline void class_name(char_type const* str) { class_name_ = str; }
-			inline void class_name(string_type const& str) { class_name_ = str; }
-			inline void class_name(wnd_class const& wclass) { class_name_ = wclass.class_name(); }
-
-			// hInstanceのセット
-			inline void instance(HINSTANCE hInst) { hInst_ = hInst; }
-
-			// 親ウィンドウハンドルのセット
-			inline void parent(HWND hParent) { hParent_ = hParent; }
-
 			// プロシージャの呼び出し
 			inline LRESULT callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				return proc_(hWnd, msg, wParam, lParam);
 			}
-			// プロシージャの指定
-			// basic_window_class<Char>で登録したウィンドウクラスなら自動でコールバックされる
-			template<typename Func>
-			inline void procedure(Func const& func) { proc_ = func; }
-			template<typename Func>
-			inline void procedure(Func &&func) { proc_ = std::move(func); }
-
-			// Menu型のセット
-			inline void menu(menu_ptr const& p) {
-				menu_ptr_ = p;
-			}
-			inline void menu(menu_ptr     && p) {
-				menu_ptr_ = std::move(p);
-			}
 
 		public:
 			// friend関数
+			// HINSTANCE の操作
+			typedef attribute::instance_handle inst;
+			typedef attribute::instance_handle instance;
+			template<typename T>
+			friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::instance_handle &&);
+			// ClassNameの操作
+			typedef attribute::basic_window_class_name<Char> class_name;
+			typedef attribute::basic_window_class_name<Char> cname;
+			template<typename T>
+			friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::basic_window_class_name<T> &&);
+			// 親ウィンドウハンドルの操作
+			typedef attribute::basic_parent_window_handle<Char> parent;
+			template<typename T>
+			friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::basic_parent_window_handle<T> &&);
+			// メニューハンドルの操作
+			typedef attribute::basic_menu_handle< ::CreateMenu, Char > menu;
+			template<HMENU (WINAPI *C)(), typename T>
+			friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::basic_menu_handle<C,T> &&);
+			// ウィンドウプロシージャの操作
+			typedef attribute::procedure procedure;
+			typedef attribute::procedure proc;
+			template<typename T>
+			friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::procedure &&);
 			// Window Ex Style の操作
 			typedef attribute::ex_style ex_style;
 			template<typename T>

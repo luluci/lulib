@@ -9,7 +9,68 @@ namespace lulib { namespace win32api { namespace window_detail {
 
 	namespace attribute {
 
-		// operator<<
+		// windowへhInstanceを適用
+		template<typename Char>
+		basic_window<Char>& operator<<(basic_window<Char>& wnd, instance_handle &&hInst) {
+			// hInstanceを更新
+			wnd.hInst_ = hInst;
+			// すでにウィンドウが作成されているなら、hInstanceの更新を適用
+			if (wnd.wnd_ptr_) {
+				policy<Char>::set_window_long_ptr( wnd.wnd_ptr_.get(), GWLP_HINSTANCE, reinterpret_cast<LONG_PTR>(wnd.hInst_) );
+			}
+			// 終了
+			return wnd;
+		}
+
+		// windowへWindowClassNameを適用
+		template<typename Char>
+		basic_window<Char>& operator<<(basic_window<Char>& wnd, basic_window_class_name<Char> &&wnd_cls) {
+			// すでにウィンドウが作成されているなら、WindowClassの変更はできないっぽ
+			if (wnd.wnd_ptr_) {
+				return wnd;
+			}
+			// ClassNameを更新
+			wnd.class_name_ = wnd_cls;
+			// 終了
+			return wnd;
+		}
+
+		// windowへhParentを適用
+		template<typename Char>
+		basic_window<Char>& operator<<(basic_window<Char>& wnd, basic_parent_window_handle<Char> &&hParent) {
+			// hParentを更新
+			wnd.hParent_ = hParent;
+			// すでにウィンドウが作成されているなら、hParentの更新を適用
+			if (wnd.wnd_ptr_) {
+				::SetParent(wnd.wnd_ptr_.get(), wnd.hParent_);
+			}
+			// 終了
+			return wnd;
+		}
+
+		// windowへMenuを適用
+		template<HMENU (WINAPI *C)(), typename Char>
+		basic_window<Char>& operator<<(basic_window<Char>& wnd, basic_menu_handle<C,Char> &&menu) {
+			// menuを更新
+			wnd.menu_ptr_ = menu;
+			// すでにウィンドウが作成されているなら、hParentの更新を適用
+			if (wnd.wnd_ptr_) {
+				::SetMenu(wnd.wnd_ptr_.get(), *wnd.menu_ptr_);
+			}
+			// 終了
+			return wnd;
+		}
+
+		// windowへprocedureを適用
+		template<typename Char>
+		basic_window<Char>& operator<<(basic_window<Char>& wnd, procedure &&proc) {
+			// procを更新
+			wnd.proc_ = std::move( proc() );
+			// 終了
+			return wnd;
+		}
+
+		// windowへtitleを適用
 		template<typename Char>
 		basic_window<Char>& operator<<(basic_window<Char>& wnd, basic_title<Char> &&t) {
 			// titleを更新
@@ -22,7 +83,7 @@ namespace lulib { namespace win32api { namespace window_detail {
 			return wnd;
 		}
 
-		// operator
+		// windowへExStyleを適用
 		template<typename Char>
 		basic_window<Char>& operator<<(basic_window<Char>& wnd, ex_style && s) {
 			// ex_styleを更新
@@ -48,7 +109,7 @@ namespace lulib { namespace win32api { namespace window_detail {
 			return wnd;
 		}
 
-		// operator
+		// windowへstyleを適用
 		template<typename Char>
 		basic_window<Char>& operator<<(basic_window<Char>& wnd, style &&s) {
 			// styleを更新
@@ -74,7 +135,7 @@ namespace lulib { namespace win32api { namespace window_detail {
 			return wnd;
 		}
 
-		// operator
+		// windowへpositionを適用
 		template<typename Char>
 		basic_window<Char>& operator<<(basic_window<Char>& wnd, position &&p) {
 			// styleを更新
@@ -110,7 +171,7 @@ namespace lulib { namespace win32api { namespace window_detail {
 			return wnd;
 		}
 
-		// operator
+		// windowへsizeを適用
 		template<typename Char>
 		basic_window<Char>& operator<<(basic_window<Char>& wnd, size &&s) {
 			// styleを更新
@@ -140,7 +201,7 @@ namespace lulib { namespace win32api { namespace window_detail {
 			return wnd;
 		}
 
-		// operator
+		// windowへrepaintを適用
 		template<typename Char>
 		basic_window<Char>& operator<<(basic_window<Char>& wnd, repaint_t &&) {
 			// すでにウィンドウが作成されているなら、画面の更新

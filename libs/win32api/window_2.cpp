@@ -107,11 +107,11 @@ public:
 		using std::placeholders::_3;
 		using std::placeholders::_4;
 		// ウィンドウ作成
-		wnd_.class_name(wnd_class);
-		wnd_.instance(hInst);
-		wnd_.procedure( std::bind(&my_window::WndProc, this, _1, _2, _3, _4) );
-		wnd_.parent(0),
-		wnd_.menu(menu_);
+		wnd_ << window::class_name(wnd_class);
+		wnd_ << window::instance(hInst);
+		wnd_ << window::procedure( std::bind(&my_window::WndProc, this, _1, _2, _3, _4) );
+		wnd_ << window::parent(0),
+		wnd_ << window::menu(menu_);
 		wnd_ << window::title("(null)");
 		wnd_ << window::ex_style(0) << window::style(WS_OVERLAPPEDWINDOW) <<- window::style(WS_MAXIMIZEBOX);
 		wnd_ << window::pos(100, 100) << window::size(400, 100);
