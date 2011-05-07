@@ -3,14 +3,14 @@
 
 #include <windows.h>
 
-#include <lulib/win32api/window/basic_window.hpp>
+#include <lulib/win32api/window/detail/window_base.hpp>
 
 namespace lulib { namespace win32api { namespace window_detail { namespace attribute {
 
 	// HWND型
-	template<typename Char = TCHAR>
+	template<typename Derived, typename Char = TCHAR>
 	class basic_parent_window_handle {
-		typedef basic_window<Char> window;
+		typedef window_base<Derived,Char> window;
 
 	public:
 		basic_parent_window_handle(HWND hParent) : hParent_(hParent) {}
