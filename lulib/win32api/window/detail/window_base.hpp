@@ -75,6 +75,9 @@ namespace lulib { namespace win32api { namespace window_detail {
 			inline void show() {
 				::ShowWindow( wnd_ptr_.get(), SW_SHOW );
 			}
+			BOOL resize(int x, int y, int w, int h, BOOL repaint = TRUE) {
+				return ::MoveWindow(wnd_ptr_.get(), x, y, w, h, repaint);
+			}
 
 		public:
 			// リソース類の作成編

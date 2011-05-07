@@ -29,6 +29,15 @@ namespace lulib { namespace win32api { namespace window_detail {
 			ListView_SetExtendedListViewStyle(hWnd, ex_style);
 		}
 
+		// ListView_InsertColumn
+		static int insert_column(HWND hWnd, int iCol, lv_column const* pcol) {
+			return ListView_InsertColumn(hWnd, iCol, pcol);
+		}
+
+		static int insert_item(HWND hWnd, lv_item const* item) {
+			return ListView_InsertItem(hWnd, item);
+		}
+
 		// ListView_GetItem
 		static BOOL get_item(HWND hWnd, lv_item* item) {
 			return ::SendMessage(hWnd, LVM_GETITEM, 0, reinterpret_cast<LPARAM>(item));
@@ -57,6 +66,15 @@ namespace lulib { namespace win32api { namespace window_detail {
 		// ListView_SetExtendedListViewStyle
 		static void set_ex_style(HWND hWnd, DWORD ex_style) {
 			ListView_SetExtendedListViewStyle(hWnd, ex_style);
+		}
+
+		// ListView_InsertColumn
+		static int insert_column(HWND hWnd, int iCol, lv_column const* pcol) {
+			return ListView_InsertColumn(hWnd, iCol, pcol);
+		}
+
+		static int insert_item(HWND hWnd, lv_item const* item) {
+			return ListView_InsertItem(hWnd, item);
 		}
 
 		// ListView_GetItem

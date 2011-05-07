@@ -1,6 +1,7 @@
 
 #include <windows.h>
 
+#include <sstream>
 #include <functional>
 
 #include <lulib/win32api/window.hpp>
@@ -13,20 +14,9 @@ struct wm {
 	struct command {
 		enum enum_t {
 			exit,
-			submenu_title,
-			title_1,
-			title_2,
-			title_3,
-			submenu_pos,
-			pos_1,
-			pos_2,
-			pos_3,
-			pos_4,
-			submenu_size,
-			size_1,
-			size_2,
-			size_3,
-			size_4,
+			edit_list_view,
+			lv_add_1,
+			lv_delete_2,
 		};
 	};
 };
@@ -44,7 +34,7 @@ class my_window {
 	typedef lulib::win32api::list_view list_view;
 
 public:
-	my_window() {}
+	my_window() : row_count_(0) {}
 
 	bool create(HINSTANCE hInst) {
 		// メニュー作成
@@ -52,41 +42,12 @@ public:
 		*menu_ << menu::string(wm::command::exit, "Exit");
 
 		// タイトル操作メニュー
-		*menu_ << menu::submenu( wm::command::submenu_title, "タイトルの操作");
+		*menu_ << menu::submenu( wm::command::edit_list_view, "ListViewの操作");
 		{
-			auto submenu = menu_->get_submenu(wm::command::submenu_title);
+			auto submenu = menu_->get_submenu(wm::command::edit_list_view);
 			*submenu
-				<< menu::string( wm::command::title_1, "タイトル-タイプZERO")
-				<< menu::string( wm::command::title_2, "Title-2")
-				<< menu::string( wm::command::title_3, "たいとる")
-			;
-		}
-
-		// ウィンドウ位置メニュー
-		*menu_ << menu::submenu( wm::command::submenu_pos, "ウィンドウ位置の操作");
-		{
-			auto submenu = menu_->get_submenu(wm::command::submenu_pos);
-			*submenu
-				<< menu::string( wm::command::pos_1, "右に+50")
-				<< menu::string( wm::command::pos_2, "左に+50")
-				<< menu::string( wm::command::pos_3, "下に+50")
-				<< menu::separator(wm::command::pos_3)  // wm::command::pos_3の後ろに挿入
-				<< menu::string( wm::command::pos_4, "(100,100)")
-				<< menu::hilite(wm::command::pos_4)
-			;
-		}
-
-		// ウィンドウサイズメニュー
-		*menu_ << menu::submenu( wm::command::submenu_size, "ウィンドウサイズの操作");
-		{
-			auto submenu = menu_->get_submenu(wm::command::submenu_size);
-			*submenu
-				<< menu::string( wm::command::size_1, "幅+50")
-				<< menu::string( wm::command::size_2, "幅-50")
-				<< menu::string( wm::command::size_3, "高さ+50")
-				<< menu::separator(wm::command::size_3)  // wm::command::size_3の後ろに挿入
-				<< menu::string( wm::command::size_4, "(400,100)")
-				<< menu::multi(wm::command::size_4, menu::states::defitem | menu::states::checked)
+				<< menu::string( wm::command::lv_add_1, "行追加")
+				//<< menu::string( wm::command::lv_delete_2, "Title-2")
 			;
 		}
 
@@ -136,10 +97,17 @@ public:
 		lv_ << list_view::lv_ex_style(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 		// 列作成
 		list_view::column col;
+		// 列1
 		col.text("列1");
 		col.width(40);
 		col.subitem(1);
 		col.index(10);
+		lv_ << col;
+		// 列2
+		col.text("列2");
+		col.width(60);
+		col.subitem(2);
+		col.index(1);
 		lv_ << col;
 
 		return true;
@@ -154,65 +122,22 @@ private:
 				break;
 			}
 			// Title
-			case wm::command::title_1: {
-				wnd_ << window::title("タイトル-タイプZERO");
-				*menu_
-					<< menu::checked(id)
-					<< menu::enable(wm::command::title_2)
-					<< menu::enable(wm::command::title_3)
-				;
-				break;
-			}
-			case wm::command::title_2: {
-				wnd_ << window::title("Title-2");
-				*menu_
-					<< menu::checked(id)
-					<< menu::enable(wm::command::title_1)
-					<< menu::enable(wm::command::title_3)
-				;
-				break;
-			}
-			case wm::command::title_3: {
-				wnd_ << window::title("たいとる");
-				*menu_
-					<< menu::checked(id)
-					<< menu::enable(wm::command::title_1)
-					<< menu::enable(wm::command::title_2)
-				;
-				break;
-			}
-			// position
-			case wm::command::pos_1: {
-				wnd_ <<+ window::pos(50, 0);
-				break;
-			}
-			case wm::command::pos_2: {
-				wnd_ <<- window::pos(50, 0);
-				break;
-			}
-			case wm::command::pos_3: {
-				wnd_ <<- window::pos(0, -50);
-				break;
-			}
-			case wm::command::pos_4: {
-				wnd_ << window::pos(100, 100);
-				break;
-			}
-			// size
-			case wm::command::size_1: {
-				wnd_ <<+ window::size(50, 0);
-				break;
-			}
-			case wm::command::size_2: {
-				wnd_ <<- window::size(50, 0);
-				break;
-			}
-			case wm::command::size_3: {
-				wnd_ <<- window::size(0, -50);
-				break;
-			}
-			case wm::command::size_4: {
-				wnd_ << window::size(400, 100);
+			case wm::command::lv_add_1: {
+				std::stringstream ss;
+				ss << (row_count_+1) << "行";
+
+				list_view::item item;
+				// 1列目
+				item.pos(row_count_,0);
+				item.text(ss.str() + "1列");
+				lv_ << item;
+				// 2列目
+				item.pos(row_count_,1);
+				item.text(ss.str() + "2列");
+				lv_ << item;
+
+				++row_count_;
+
 				break;
 			}
 		}
@@ -220,6 +145,24 @@ private:
 
 	LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		switch(msg) {
+			case WM_SIZE: {
+				int width = LOWORD(lParam);
+				int height = HIWORD(lParam);
+
+				switch (wParam) {
+				case SIZE_MINIMIZED:  // 「最小化」
+					break;
+		
+				case SIZE_RESTORED:  // 最小化、最大化以外でサイズが変更された
+					lv_.resize(0, 0, width, height);
+					return 0;
+		
+				default:
+					break;
+				}
+				break;
+			}
+
 			case WM_COMMAND: {
 				std::size_t id = LOWORD(wParam);
 				on_command(id);
@@ -241,6 +184,7 @@ private:
 	window wnd_;
 	menu_ptr menu_;
 	list_view lv_;
+	int row_count_;
 };
 
 

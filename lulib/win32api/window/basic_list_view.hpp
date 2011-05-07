@@ -28,6 +28,8 @@ namespace lulib { namespace win32api {
 		public:
 			// ListView列型
 			typedef common_control::basic_list_view_column<Char> column;
+			// ListViewアイテム型
+			typedef common_control::basic_list_view_item<Char> item;
 
 		public:
 			basic_list_view() : base_type(), lv_ex_style_(0) {
@@ -72,6 +74,10 @@ namespace lulib { namespace win32api {
 			template<typename T>
 			friend basic_list_view<T>& common_control::operator<<(
 				basic_list_view<T>&, common_control::basic_list_view_column<T> const&);
+			// itemの操作
+			template<typename T>
+			friend basic_list_view<T>& common_control::operator<<(
+				basic_list_view<T>&, common_control::basic_list_view_item<T> const&);
 
 		private:
 			// ListView Ex Style
