@@ -17,7 +17,6 @@ namespace lulib { namespace win32api { namespace window_detail { namespace commo
 		typedef list_view_policy<Char> policy;
 
 		// ex_styleを更新
-		lv.lv_ex_style_ = policy::get_ex_style(lv);
 		switch (s.mode()) {
 			case ex_style::modes::subst: {
 				lv.lv_ex_style_ = s();
@@ -59,11 +58,11 @@ namespace lulib { namespace win32api { namespace window_detail { namespace commo
 		int result;
 		// 1列目ならinsert
 		if (item.col() == 0) {
-			policy::insert_item(lv, item);
+			result = policy::insert_item(lv, item);
 		}
 		// 1列目以降ならset
 		else {
-			policy::set_item(lv, item);
+			result = policy::set_item(lv, item);
 		}
 		if (result == -1) {
 			throw ra_error("failed to ListView_SetItem()");

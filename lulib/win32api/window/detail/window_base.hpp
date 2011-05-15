@@ -14,6 +14,12 @@
 
 #include <lulib/type_traits/char_traits.hpp>
 
+#include <lulib/utility.hpp>
+
+// struct lulib::type_traits::has_on_create を生成
+#include <lulib/type_traits/has_func.hpp>
+LULIB_GEN_HAS_FUNC(on_create)
+
 namespace lulib { namespace win32api { namespace window_detail {
 
 		struct HWND_deleter {
@@ -118,6 +124,9 @@ namespace lulib { namespace win32api { namespace window_detail {
 					reinterpret_cast<LONG_PTR>(this)
 				);
 
+				// on_create
+				on_create<Derived>();
+
 				return true;
 			}
 
@@ -125,6 +134,24 @@ namespace lulib { namespace win32api { namespace window_detail {
 			inline LRESULT callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				return proc_(hWnd, msg, wParam, lParam);
 			}
+
+		private:
+			// ウィンドウ作成後の処理を呼び出す
+#ifdef __GNUC__
+			template< typename T, typename std::enable_if< lulib::type_traits::has_on_create<T>::value >::type *& = lulib::enabler >
+			inline void on_create() {
+				reinterpret_cast<Derived*>(this)->on_create();
+			}
+			template< typename T, typename std::enable_if< !lulib::type_traits::has_on_create<T>::value >::type *& = lulib::enabler >
+			inline void on_create() {}
+#else
+			template< typename T >
+			inline void on_create(typename std::enable_if< lulib::type_traits::has_on_create<T>::value >::type * = 0) {
+				reinterpret_cast<Derived*>(this)->on_create();
+			}
+			template< typename T >
+			inline void on_create(typename std::enable_if< !lulib::type_traits::has_on_create<T>::value >::type * = 0) {}
+#endif
 
 		public:
 			// friend関数

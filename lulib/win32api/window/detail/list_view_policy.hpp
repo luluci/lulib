@@ -22,20 +22,24 @@ namespace lulib { namespace win32api { namespace window_detail {
 
 		// ListView_GetExtendedListViewStyle
 		static DWORD get_ex_style(HWND hWnd) {
-			return ListView_GetExtendedListViewStyle(hWnd);
+			// ListView_GetExtendedListViewStyle(hWnd);
+			return ::SendMessage(hWnd, LVM_GETEXTENDEDLISTVIEWSTYLE, 0, 0);
 		}
 		// ListView_SetExtendedListViewStyle
 		static void set_ex_style(HWND hWnd, DWORD ex_style) {
-			ListView_SetExtendedListViewStyle(hWnd, ex_style);
+			// ListView_SetExtendedListViewStyle(hWnd, ex_style);
+			::SendMessage(hWnd, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, ex_style);
 		}
 
 		// ListView_InsertColumn
 		static int insert_column(HWND hWnd, int iCol, lv_column const* pcol) {
-			return ListView_InsertColumn(hWnd, iCol, pcol);
+			//ListView_InsertColumn(hWnd, iCol, pcol);
+			return ::SendMessage( hWnd, LVM_INSERTCOLUMNA, iCol, reinterpret_cast<LPARAM>(pcol) );
 		}
-
+		// ListView_InsertItem
 		static int insert_item(HWND hWnd, lv_item const* item) {
-			return ListView_InsertItem(hWnd, item);
+			// ListView_InsertItem(hWnd, item);
+			return ::SendMessage( hWnd, LVM_INSERTITEMA, 0, reinterpret_cast<LPARAM>(item) );
 		}
 
 		// ListView_GetItem
@@ -61,20 +65,24 @@ namespace lulib { namespace win32api { namespace window_detail {
 
 		// ListView_GetExtendedListViewStyle
 		static DWORD get_ex_style(HWND hWnd) {
-			return ListView_GetExtendedListViewStyle(hWnd);
+			// ListView_GetExtendedListViewStyle(hWnd);
+			return ::SendMessage(hWnd, LVM_GETEXTENDEDLISTVIEWSTYLE, 0, 0);
 		}
 		// ListView_SetExtendedListViewStyle
 		static void set_ex_style(HWND hWnd, DWORD ex_style) {
-			ListView_SetExtendedListViewStyle(hWnd, ex_style);
+			// ListView_SetExtendedListViewStyle(hWnd, ex_style);
+			::SendMessage(hWnd, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, ex_style);
 		}
 
 		// ListView_InsertColumn
 		static int insert_column(HWND hWnd, int iCol, lv_column const* pcol) {
-			return ListView_InsertColumn(hWnd, iCol, pcol);
+			//ListView_InsertColumn(hWnd, iCol, pcol);
+			return ::SendMessage( hWnd, LVM_INSERTCOLUMNW, iCol, reinterpret_cast<LPARAM>(pcol) );
 		}
-
+		// ListView_InsertItem
 		static int insert_item(HWND hWnd, lv_item const* item) {
-			return ListView_InsertItem(hWnd, item);
+			// ListView_InsertItem(hWnd, item);
+			return ::SendMessage( hWnd, LVM_INSERTITEMW, 0, reinterpret_cast<LPARAM>(item) );
 		}
 
 		// ListView_GetItem

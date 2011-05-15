@@ -52,6 +52,16 @@ namespace lulib { namespace win32api {
 				InitCommonControlsEx(&icc);
 			}
 
+#ifndef __GNUC__
+			template<typename T, typename U> friend class window_base;
+#else
+public:
+#endif
+			void on_create() {
+				lv_ex_style_ = lv_policy::get_ex_style(*this);
+			}
+
+		/*
 		public:
 			struct lv_ex_style {
 				enum enum_t {
@@ -61,6 +71,7 @@ namespace lulib { namespace win32api {
 					header_drag_drop = LVS_EX_HEADERDRAGDROP, // ヘッダをドラッグ&ドロップ可能にします
 				};
 			};
+		*/
 
 		public:
 			// friend関数
