@@ -22,10 +22,12 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			MessageBoxA(0, message.c_str(), "check", MB_OK);
 			return 0;
 		}
+		// 「閉じる」ボタンが押された場合などに通知
 		case WM_CLOSE: {
-			DestroyWindow(hWnd);
+			::DestroyWindow(hWnd);
 			return 0;
 		}
+		// DestroyWindowでウィンドウが破棄されたら通知
 		case WM_DESTROY: {
 			PostQuitMessage(0);
 			return 0;
@@ -37,27 +39,36 @@ LRESULT WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 int WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int cmdShow) {
 
 	// メニュー作成
-	typedef lulib::win32api::menu::menu menu_type;
-	typedef std::shared_ptr<menu_type> menu_ptr;
-	menu_ptr menu( new menu_type() );
-	typedef menu_type::state state;
-	menu->insert_item(0, "menu-0");
-	menu->set_defitem(0);
-	menu->insert_item(1, "menu-1");
-	menu->set_disabled(1);
-	menu->insert_separator(2);
-	menu->insert_submenu(3, "submenu-2");
-	menu->submenu(3)->insert_item(4, "menu-2-0");
-	menu->set_checked(4);
-	menu->submenu(3)->insert_separator(5);
-	menu->submenu(3)->insert_submenu(6, "submenu-2-1");
-	menu->submenu(3)->submenu(6)->insert_item(7, "menu-2-1-0");
-	menu->set_hilite(7);
-	menu->submenu(3)->submenu(6)->insert_item(8, "menu-2-1-1");
-	menu->set_state( 8, state::disabled | state::checked );
-	menu->submenu(3)->insert_item(9, "menu-2-2");
-	menu->insert_item(10, "menu-3");
-	menu->set_hilite(10);
+	typedef lulib::win32api::menu menu;
+	typedef std::shared_ptr<menu> menu_ptr;
+	menu_ptr m( new menu() );
+	// menu0
+	*m << menu::string(0, "menu-0");
+	*m << menu::defitem(0);
+	// menu1
+	*m << menu::string(1, "menu-1");
+	*m << menu::disabled(1);
+	// separator
+	*m << menu::separator(2);
+	// menu2
+	*m << menu::submenu(3, "submenu-2");
+	{
+		auto sm = m->get_submenu(3);
+		*sm << menu::string(4, "menu-2-0");
+		*sm << menu::checked(4);
+		*sm << menu::separator(5);
+		*sm << menu::submenu(6, "submenu-2-1");
+		{
+			auto sm2 = sm->get_submenu(6);
+			*sm2 << menu::string(7, "menu-2-1-0");
+			*sm2 << menu::hilite(7);
+			*sm2 << menu::string(8, "menu-2-1-1");
+			*sm2 << menu::multi(8, menu::states::disabled | menu::states::checked);
+		}
+		*sm << menu::menu(9, "menu-2-2");
+	}
+	*m << menu::menu(10, "menu-3");
+	*m << menu::hilite(10);
 
 	/*
 	WNDCLASSEX wc;
@@ -78,28 +89,33 @@ int WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int cmdShow) {
 	if (!RegisterClassEx(&wc)) return FALSE;       // 登録
 	*/
 	// ウィンドウクラス
-	namespace window = lulib::win32api::window;
-	typedef window::window_class window_class_type;
-	window_class_type wnd_class;
+	typedef lulib::win32api::window_class window_class;
+	window_class wnd_class;
 	wnd_class.instance(hInst);
 	wnd_class.class_name("test_window");
-	wnd_class.style( window_class_type::styles::h_redraw | window_class_type::styles::h_redraw );
+	wnd_class.style( window_class::styles::h_redraw | window_class::styles::h_redraw );
 	wnd_class.background( (HBRUSH)(COLOR_WINDOW+1) );
 	wnd_class.icon(NULL);
 	wnd_class.icon_small(NULL);
 	wnd_class.cursor( LoadCursor(NULL,IDC_ARROW) );
 	if ( !wnd_class.register_class() ) return 1;
 
-	typedef window::window window_type;
-	window_type wnd;
-	wnd.class_name(wnd_class);
-	wnd.window_name("test------------");
-	wnd.instance(hInst);
-	wnd.procedure(WndProc);
-	wnd.parent(0),
-	wnd.menu(menu);
+	typedef lulib::win32api::window window;
+	//
+	using std::placeholders::_1;
+	using std::placeholders::_2;
+	using std::placeholders::_3;
+	using std::placeholders::_4;
+	//
+	window wnd;
+	wnd << window::class_name(wnd_class);
+	wnd << window::instance(hInst);
+	wnd << window::procedure(WndProc);
+	wnd << window::parent(0),
+	wnd << window::menu(m);
+	wnd << window::title("test------------");
 	wnd << window::ex_style(0) << window::style(WS_OVERLAPPEDWINDOW) <<- window::style(WS_MAXIMIZEBOX);
-	wnd.rect(100, 100, 400, 100);
+	wnd << window::pos(100, 100, 400, 100);
 	wnd.create();
 	wnd.show();
 

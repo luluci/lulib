@@ -17,7 +17,7 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 		basic_title(string_type && t) : title_( std::move(t) ) {}
 		basic_title(string_type const& t) : title_(t) {}
 
-		inline std::string& operator()() { return title_; }
+		inline string_type& operator()() { return title_; }
 
 	private:
 		string_type title_;  // タイトルバーに表示されるテキスト

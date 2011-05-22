@@ -2,7 +2,6 @@
 #pragma warning(disable : 4819)
 
 #include <windows.h>
-//#include <commctrl.h>
 
 #include <map>
 #include <memory>
@@ -19,13 +18,29 @@
 
 namespace lulib { namespace win32api {
 
+	namespace window_detail {
+		template<typename Derived, typename Char> class window_base;
+
+		namespace attribute {
+			template<HMENU (WINAPI *C)(), typename Char> class basic_menu_handle;
+			template<typename Derived, HMENU (WINAPI *C)(), typename Char>
+			window_base<Derived,Char>& operator<<(window_base<Derived,Char>&, basic_menu_handle<C,Char> &&);
+		}
+	}
+
 	namespace menu_detail {
 
 		struct HMENU_deleter {
 			typedef HMENU pointer;
 			void operator()(HMENU hMenu) {
-				if (hMenu) ::DestroyMenu(hMenu);
+				// ウィンドウに割り当てられていないなら手動削除
+				if (!is_assigned_) ::DestroyMenu(hMenu);
 			}
+
+			HMENU_deleter(bool &is_assigned) : is_assigned_(is_assigned) {}
+
+		private:
+			bool &is_assigned_;
 		};
 
 		// メニュークラス
@@ -34,7 +49,7 @@ namespace lulib { namespace win32api {
 			typedef basic_menu<create_menu, Char> self_type;
 
 			// Char型特性
-			typedef lulib::char_traits<Char> char_traits;
+			typedef lulib::char_traits<Char>          char_traits;
 			typedef typename char_traits::char_type   char_type;
 			typedef typename char_traits::string_type string_type;
 
@@ -62,19 +77,23 @@ namespace lulib { namespace win32api {
 
 		public:
 			basic_menu(void)
-				: menu_ptr_( create_menu() )
+			: menu_ptr_( create_menu(), HMENU_deleter(is_assigned_) )
+			, c_(), is_assigned_(false)
 			{
 				if (!menu_ptr_) {
 					throw ra_error("faild to CreateMenu().");
 				}
 			}
 			basic_menu(self_type &&obj)
-				: menu_ptr_( std::move(obj.menu_ptr_) ), c_( std::move(obj.c_) )
+			: menu_ptr_( std::move(obj.menu_ptr_) )
+			, c_( std::move(obj.c_) )
+			, is_assigned_( obj.is_assigned_ )
 			{
 			}
 			self_type& operator=(self_type &&obj) {
 				menu_ptr_ = std::move(obj.menu_ptr_);
 				c_ = std::move(obj.c_);
+				is_assigned_ = obj.is_assigned_;
 				return *this;
 			}
 		private:
@@ -105,6 +124,7 @@ namespace lulib { namespace win32api {
 			// friend関数
 			// メニューアイテム
 			// 文字列メニューアイテム
+			typedef item::basic_string<Char> menu;
 			typedef item::basic_string<Char> string;
 			template<HMENU (WINAPI *C)(), typename T>
 			friend basic_menu<C,T>& item::operator<<(basic_menu<C,T>&, item::basic_string<T> &&);
@@ -144,12 +164,20 @@ namespace lulib { namespace win32api {
 			template<HMENU (WINAPI *C)(), typename T>
 			friend basic_menu<C,T>& state::operator<<(basic_menu<C,T>&, state::multi &&);
 
+			// WindowクラスへのMenu登録
+			template<typename D, HMENU (WINAPI *A)(), typename C>
+			friend window_detail::window_base<D,C>& window_detail::attribute::operator<<(
+				window_detail::window_base<D,C>&, window_detail::attribute::basic_menu_handle<A,C> &&);
+
 		private:
 			// メニューハンドラ
 			// HMENU create_menu() によってメニュー or サブメニュー
 			menu_ptr menu_ptr_;
 			// サブメニューコンテナ
 			container c_;
+			// HWND or HMENU に割り当てられているか
+			// 割り当てられている場合、自動で解放される
+			bool is_assigned_;
 
 		};
 	}// namespace lulib::win32api::menu_detail

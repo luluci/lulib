@@ -46,6 +46,7 @@ namespace lulib { namespace win32api { namespace window_detail {
 			typedef std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> procedure_type;
 
 			// HWNDハンドラ
+			// HWNDが生きたままwindow_baseが破棄されるとき、デリータが呼ばれる
 			// これは共有しないよ！
 #ifdef _MSC_VER
 			typedef std::unique_ptr<HWND, HWND_deleter> wnd_ptr;
@@ -83,6 +84,11 @@ namespace lulib { namespace win32api { namespace window_detail {
 			}
 			BOOL resize(int x, int y, int w, int h, BOOL repaint = TRUE) {
 				return ::MoveWindow(wnd_ptr_.get(), x, y, w, h, repaint);
+			}
+
+			// 有効なMenuを持っているか
+			bool has_menu() {
+				return menu_ptr_;
 			}
 
 		public:

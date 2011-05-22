@@ -30,6 +30,11 @@ namespace lulib { namespace win32api { namespace window_detail {
 			// ListView_SetExtendedListViewStyle(hWnd, ex_style);
 			::SendMessage(hWnd, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, ex_style);
 		}
+		// ListView_SetExtendedListViewStyleEx
+		static void set_ex_style_ex(HWND hWnd, DWORD mask, DWORD ex_style) {
+			// ListView_SetExtendedListViewStyleEx(hWnd, mask, ex_style);
+			::SendMessage(hWnd, LVM_SETEXTENDEDLISTVIEWSTYLE, mask, ex_style);
+		}
 
 		// ListView_InsertColumn
 		static int insert_column(HWND hWnd, int iCol, lv_column const* pcol) {
@@ -49,6 +54,15 @@ namespace lulib { namespace win32api { namespace window_detail {
 		// ListView_SetItem
 		static BOOL set_item(HWND hWnd, lv_item const* item) {
 			return ::SendMessage(hWnd, LVM_SETITEM, 0, reinterpret_cast<LPARAM>(item));
+		}
+
+		// ListView_DeleteItem
+		static BOOL delete_item(HWND hWnd, int i) {
+			return ::SendMessage(hWnd, LVM_DELETEITEM, i, 0);
+		}
+		// ListView_DeleteAllItems
+		static BOOL delete_all_items(HWND hWnd) {
+			return ::SendMessage(hWnd, LVM_DELETEALLITEMS, 0, 0);
 		}
 	};
 	char const* list_view_policy<char>::wnd_class = WC_LISTVIEWA;
@@ -92,6 +106,15 @@ namespace lulib { namespace win32api { namespace window_detail {
 		// ListView_SetItem
 		static BOOL set_item(HWND hWnd, lv_item const* item) {
 			return ::SendMessage(hWnd, LVM_SETITEM, 0, reinterpret_cast<LPARAM>(item));
+		}
+
+		// ListView_DeleteItem
+		static BOOL delete_item(HWND hWnd, int i) {
+			return ::SendMessage(hWnd, LVM_DELETEITEM, i, 0);
+		}
+		// ListView_DeleteAllItems
+		static BOOL delete_all_items(HWND hWnd) {
+			return ::SendMessage(hWnd, LVM_DELETEALLITEMS, 0, 0);
 		}
 	};
 	wchar_t const* list_view_policy<wchar_t>::wnd_class = WC_LISTVIEWW;
