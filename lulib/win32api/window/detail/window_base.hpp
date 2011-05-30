@@ -65,6 +65,7 @@ namespace lulib { namespace win32api { namespace window_detail {
 				, menu_ptr_(), hInst_(), proc_()
 			{
 			}
+			virtual ~window_base() {}
 
 			inline operator HWND() {
 				return wnd_ptr_.get();
