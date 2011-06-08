@@ -29,21 +29,47 @@ namespace lulib { namespace win32api {
 			// windowポリシー
 			typedef ::lulib::win32api::window_detail::policy<Char> policy;
 
+			// ウィンドウプロシージャコールバック
+			typedef std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> procedure_type;
+
 		public:
-			basic_window() : base_type() {}
+			basic_window() : base_type(), proc_() {}
 
 		private:
 			basic_window(self_type const&);
 			self_type const& operator=(self_type const&);
 
 		public:
+			// swap
+			void swap(self_type &obj) throw() {
+				this->base_type::swap(obj);
+				std::swap( proc_, obj.proc_ );
+			}
+
+		public:
+			// プロシージャの呼び出し
+			inline LRESULT callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+				// プロシージャがセットされているなら実行
+				if (proc_) return proc_(hWnd, msg, wParam, lParam);
+				// プロシージャがセットされていないなら、DefWindowProcにまかせる
+				else return policy::def_window_proc(hWnd, msg, wParam, lParam);
+			}
+
+		public:
 			// friend関数
+			// ウィンドウプロシージャの操作
+			typedef attribute::procedure procedure;
+			typedef attribute::procedure proc;
+			template<typename C>
+			friend basic_window<C>& attribute::operator<<(basic_window<C>&, attribute::procedure &&);
 			// ClassNameの操作
 			typedef attribute::basic_window_class_name<Char> class_name;
 			typedef attribute::basic_window_class_name<Char> cname;
 			template<typename T>
 			friend basic_window<T>& attribute::operator<<(basic_window<T>&, attribute::basic_window_class_name<T> &&);
 
+		private:
+			procedure_type proc_;      // ウィンドウプロシージャ
 		};
 	}//namespace lulib::win32api::window_detail
 

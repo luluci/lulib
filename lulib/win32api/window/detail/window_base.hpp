@@ -42,9 +42,6 @@ namespace lulib { namespace win32api { namespace window_detail {
 			// windowポリシー
 			typedef ::lulib::win32api::window_detail::policy<Char> policy;
 
-			// ウィンドウプロシージャコールバック
-			typedef std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> procedure_type;
-
 			// HWNDハンドラ
 			// HWNDが生きたままwindow_baseが破棄されるとき、デリータが呼ばれる
 			// これは共有しないよ！
@@ -62,10 +59,16 @@ namespace lulib { namespace win32api { namespace window_detail {
 			window_base()
 				: wnd_ptr_(), ex_style_(), class_name_(), window_name_()
 				, style_(WS_OVERLAPPEDWINDOW), x_(), y_(), w_(), h_(), hParent_()
-				, menu_ptr_(), hInst_(), proc_()
+				, menu_ptr_(), hInst_(), is_child_(false)
 			{
 			}
-			virtual ~window_base() {}
+			virtual ~window_base() {
+				// HWNDが子ウィンドウなら
+				if (is_child_) {
+					// トップレベルウィンドウに戻す
+					::SetParent(wnd_ptr_.get(), 0);
+				}
+			}
 
 			inline operator HWND() {
 				return wnd_ptr_.get();
@@ -77,14 +80,33 @@ namespace lulib { namespace win32api { namespace window_detail {
 			window_base(self_type const&);
 			self_type const& operator=(self_type const&);
 
+		public:
+			// swap
+			void swap(self_type &obj) throw() {
+				std::swap( wnd_ptr_, obj.wnd_ptr_ );
+				std::swap( ex_style_, obj.ex_style_ );
+				std::swap( class_name_, obj.class_name_ );
+				std::swap( window_name_, obj.window_name_ );
+				std::swap( style_, obj.style_ );
+				std::swap( x_, obj.x_ );
+				std::swap( y_, obj.y_ );
+				std::swap( w_, obj.w_ );
+				std::swap( h_, obj.h_ );
+				std::swap( hParent_, obj.hParent_ );
+				std::swap( menu_ptr_, obj.menu_ptr_ );
+				std::swap( hInst_, obj.hInst_ );
+				std::swap( is_child_, obj.is_child_ );
+			}
 
 		public:
 			// ウィンドウ操作編
-			inline void show() {
-				::ShowWindow( wnd_ptr_.get(), SW_SHOW );
+			//   true: 表示
+			//  false: 非表示
+			inline bool show() {
+				return ::ShowWindow( wnd_ptr_.get(), SW_SHOW ) != 0;
 			}
-			BOOL resize(int x, int y, int w, int h, BOOL repaint = TRUE) {
-				return ::MoveWindow(wnd_ptr_.get(), x, y, w, h, repaint);
+			inline bool resize(int x, int y, int w, int h, BOOL repaint = TRUE) {
+				return ::MoveWindow(wnd_ptr_.get(), x, y, w, h, repaint) != 0;
 			}
 
 			// 有効なMenuを持っているか
@@ -137,11 +159,6 @@ namespace lulib { namespace win32api { namespace window_detail {
 				return true;
 			}
 
-			// プロシージャの呼び出し
-			inline LRESULT callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-				return proc_(hWnd, msg, wParam, lParam);
-			}
-
 		private:
 			// ウィンドウ作成後の処理を呼び出す
 #ifdef __GNUC__
@@ -179,11 +196,6 @@ namespace lulib { namespace win32api { namespace window_detail {
 			// 子ウィンドウID(自分自身を示す一意なID。ユーザ指定(enumとか))を指定する場合
 			template<typename D, typename C>
 			friend window_base<D,C>& attribute::operator<<(window_base<D,C>&, HMENU);
-			// ウィンドウプロシージャの操作
-			typedef attribute::procedure procedure;
-			typedef attribute::procedure proc;
-			template<typename D, typename C>
-			friend window_base<D,C>& attribute::operator<<(window_base<D,C>&, attribute::procedure &&);
 			// Window Ex Style の操作
 			typedef attribute::ex_style ex_style;
 			template<typename D, typename C>
@@ -216,6 +228,6 @@ namespace lulib { namespace win32api { namespace window_detail {
 			HWND hParent_;             // 親ウィンドウハンドル
 			menu_ptr menu_ptr_;        // HMENUハンドラ : nullを許容
 			HINSTANCE hInst_;          // HINSTANCE
-			procedure_type proc_;      // ウィンドウプロシージャ
+			bool is_child_;            // 子ウィンドウであるかどうか
 		};
 }}}//namespace lulib::win32api::window_detail

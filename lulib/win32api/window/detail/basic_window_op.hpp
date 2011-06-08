@@ -11,13 +11,22 @@ namespace lulib { namespace win32api { namespace window_detail {
 
 		// windowへWindowClassNameを適用
 		template<typename Char>
-		basic_window<Char>& operator<<(basic_window<Char>& wnd, basic_window_class_name<Char> &&wnd_cls) {
+		basic_window<Char>& operator<<(basic_window<Char> &wnd, basic_window_class_name<Char> &&wnd_cls) {
 			// すでにウィンドウが作成されているなら、WindowClassの変更はできないっぽ
 			if (wnd.wnd_ptr_) {
 				return wnd;
 			}
 			// ClassNameを更新
 			wnd.class_name_ = wnd_cls;
+			// 終了
+			return wnd;
+		}
+
+		// windowへprocedureを適用
+		template<typename Char>
+		basic_window<Char>& operator<<(basic_window<Char> &wnd, attribute::procedure &&proc) {
+			// procを更新
+			wnd.proc_ = std::move( proc() );
 			// 終了
 			return wnd;
 		}

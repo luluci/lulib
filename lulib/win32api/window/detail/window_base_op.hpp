@@ -25,6 +25,10 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, basic_parent_window_handle<Derived,Char> &&hParent) {
 		// hParentを更新
 		wnd.hParent_ = hParent;
+		// hParentが
+		//   NULL以外: wndは子ウィンドウになる
+		//   NULL    : wndは親ウィンドウを持たない
+		wnd.is_child_ = (hParent() != 0);
 		// すでにウィンドウが作成されているなら、hParentの更新を適用
 		if (wnd.wnd_ptr_) {
 			::SetParent(wnd.wnd_ptr_.get(), wnd.hParent_);
@@ -60,15 +64,6 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 			reinterpret_cast< typename window_base<Derived,Char>::menu_type* >(wnd_id),
 			[](typename window_base<Derived,Char>::menu_type*){}
 		);
-		// 終了
-		return wnd;
-	}
-
-	// windowへprocedureを適用
-	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, procedure &&proc) {
-		// procを更新
-		wnd.proc_ = std::move( proc() );
 		// 終了
 		return wnd;
 	}

@@ -74,6 +74,13 @@ public:
 		*/
 
 		public:
+			// swap
+			void swap(self_type &obj) throw() {
+				this->base_type::swap(obj);
+				std::swap( lv_ex_style_, obj.lv_ex_style_ );
+			}
+
+		public:
 			// friend関数
 			// ListView Ex Style の操作
 			// ウィンドウ作成後にしか操作は意味が無い
