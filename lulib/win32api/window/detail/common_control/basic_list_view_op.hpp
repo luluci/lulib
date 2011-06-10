@@ -1,8 +1,8 @@
 #pragma once
 #pragma warning(disable : 4819)
 
-#include <lulib/win32api/window/detail/basic_list_view_fwd.hpp>
-#include <lulib/win32api/window/detail/list_view_policy.hpp>
+#include <lulib/win32api/window/basic_list_view_fwd.hpp>
+#include <lulib/win32api/window/detail/common_control/list_view_policy.hpp>
 #include <lulib/win32api/window/detail/common_control/basic_list_view_column.hpp>
 #include <lulib/win32api/window/detail/common_control/basic_list_view_item.hpp>
 #include <lulib/win32api/window/detail/common_control/ex_style.hpp>

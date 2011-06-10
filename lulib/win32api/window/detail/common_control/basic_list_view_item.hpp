@@ -4,7 +4,7 @@
 //#include <windows.h>
 #include <commctrl.h>
 
-#include <lulib/win32api/window/detail/list_view_policy.hpp>
+#include <lulib/win32api/window/detail/common_control/list_view_policy.hpp>
 
 #include <lulib/type_traits/char_traits.hpp>
 

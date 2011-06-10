@@ -5,8 +5,8 @@
 #include <commctrl.h>
 
 #include <lulib/win32api/window/detail/window_base.hpp>
-#include <lulib/win32api/window/detail/basic_list_view_op.hpp>
-#include <lulib/win32api/window/detail/list_view_policy.hpp>
+#include <lulib/win32api/window/detail/common_control/basic_list_view_op.hpp>
+#include <lulib/win32api/window/detail/common_control/list_view_policy.hpp>
 #include <lulib/win32api/window/detail/common_control/basic_list_view_column.hpp>
 
 #include <lulib/win32api/exceptions.hpp>
@@ -23,7 +23,7 @@ namespace lulib { namespace win32api {
 			typedef window_base<basic_list_view<Char>, Char> base_type;
 
 			// ListViewポリシー
-			typedef list_view_policy<Char> lv_policy;
+			typedef common_control::list_view_policy<Char> lv_policy;
 
 		public:
 			// ListView列型

@@ -4,7 +4,7 @@
 #include <windows.h>
 #include <commctrl.h>
 
-namespace lulib { namespace win32api { namespace window_detail {
+namespace lulib { namespace win32api { namespace window_detail { namespace common_control {
 
 	// Windowポリシー
 	template<typename Char>
@@ -119,4 +119,4 @@ namespace lulib { namespace win32api { namespace window_detail {
 	};
 	wchar_t const* list_view_policy<wchar_t>::wnd_class = WC_LISTVIEWW;
 
-}}}// namespace lulib::win32api::window_detail
+}}}}// namespace lulib::win32api::window_detail::common_control
