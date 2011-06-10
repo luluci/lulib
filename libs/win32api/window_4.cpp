@@ -28,7 +28,6 @@ class my_window {
 
 	// メニュー型
 	typedef lulib::win32api::menu menu;
-	typedef std::shared_ptr<menu> menu_ptr;
 
 	// ListViewウィンドウ型
 	typedef lulib::win32api::list_view list_view;
@@ -38,13 +37,12 @@ public:
 
 	bool create(HINSTANCE hInst) {
 		// メニュー作成
-		menu_.reset( new menu() );
-		*menu_ << menu::string(wm::command::exit, "Exit");
+		menu_ << menu::string(wm::command::exit, "Exit");
 
 		// タイトル操作メニュー
-		*menu_ << menu::submenu( wm::command::edit_list_view, "ListViewの操作");
+		menu_ << menu::submenu( wm::command::edit_list_view, "ListViewの操作");
 		{
-			auto submenu = menu_->get_submenu(wm::command::edit_list_view);
+			auto submenu = menu_.get_submenu(wm::command::edit_list_view);
 			*submenu
 				<< menu::string( wm::command::lv_add_1, "行追加")
 				//<< menu::string( wm::command::lv_delete_2, "Title-2")
@@ -182,7 +180,7 @@ private:
 
 private:
 	window wnd_;
-	menu_ptr menu_;
+	menu menu_;
 	list_view lv_;
 	int row_count_;
 };

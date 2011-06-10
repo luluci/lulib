@@ -37,20 +37,18 @@ class my_window {
 
 	// メニュー型
 	typedef lulib::win32api::menu menu;
-	typedef std::shared_ptr<menu> menu_ptr;
 
 public:
 	my_window() {}
 
 	bool create(HINSTANCE hInst) {
 		// メニュー作成
-		menu_.reset( new menu() );
-		*menu_ << menu::string(wm::command::exit, "Exit");
+		menu_ << menu::string(wm::command::exit, "Exit");
 
 		// タイトル操作メニュー
-		*menu_ << menu::submenu( wm::command::submenu_title, "タイトルの操作");
+		menu_ << menu::submenu( wm::command::submenu_title, "タイトルの操作");
 		{
-			auto submenu = menu_->get_submenu(wm::command::submenu_title);
+			auto submenu = menu_.get_submenu(wm::command::submenu_title);
 			*submenu
 				<< menu::string( wm::command::title_1, "タイトル-タイプZERO")
 				<< menu::string( wm::command::title_2, "Title-2")
@@ -59,9 +57,9 @@ public:
 		}
 
 		// ウィンドウ位置メニュー
-		*menu_ << menu::submenu( wm::command::submenu_pos, "ウィンドウ位置の操作");
+		menu_ << menu::submenu( wm::command::submenu_pos, "ウィンドウ位置の操作");
 		{
-			auto submenu = menu_->get_submenu(wm::command::submenu_pos);
+			auto submenu = menu_.get_submenu(wm::command::submenu_pos);
 			*submenu
 				<< menu::string( wm::command::pos_1, "右に+50")
 				<< menu::string( wm::command::pos_2, "左に+50")
@@ -73,9 +71,9 @@ public:
 		}
 
 		// ウィンドウサイズメニュー
-		*menu_ << menu::submenu( wm::command::submenu_size, "ウィンドウサイズの操作");
+		menu_ << menu::submenu( wm::command::submenu_size, "ウィンドウサイズの操作");
 		{
-			auto submenu = menu_->get_submenu(wm::command::submenu_size);
+			auto submenu = menu_.get_submenu(wm::command::submenu_size);
 			*submenu
 				<< menu::string( wm::command::size_1, "幅+50")
 				<< menu::string( wm::command::size_2, "幅-50")
@@ -128,7 +126,7 @@ private:
 			// Title
 			case wm::command::title_1: {
 				wnd_ << window::title("タイトル-タイプZERO");
-				*menu_
+				menu_
 					<< menu::checked(id)
 					<< menu::enable(wm::command::title_2)
 					<< menu::enable(wm::command::title_3)
@@ -137,7 +135,7 @@ private:
 			}
 			case wm::command::title_2: {
 				wnd_ << window::title("Title-2");
-				*menu_
+				menu_
 					<< menu::checked(id)
 					<< menu::enable(wm::command::title_1)
 					<< menu::enable(wm::command::title_3)
@@ -146,7 +144,7 @@ private:
 			}
 			case wm::command::title_3: {
 				wnd_ << window::title("たいとる");
-				*menu_
+				menu_
 					<< menu::checked(id)
 					<< menu::enable(wm::command::title_1)
 					<< menu::enable(wm::command::title_2)
@@ -211,7 +209,7 @@ private:
 
 private:
 	window wnd_;
-	menu_ptr menu_;
+	menu menu_;
 };
 
 

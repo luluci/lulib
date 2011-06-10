@@ -36,7 +36,6 @@ class my_window {
 
 	// メニュー型
 	typedef lulib::win32api::menu menu;
-	typedef std::shared_ptr<menu> menu_ptr;
 
 	// io service
 	typedef boost::asio::io_service io_service;
@@ -63,21 +62,20 @@ public:
 
 	bool create(HINSTANCE hInst) {
 		// メニュー作成
-		menu_.reset( new menu() );
-		*menu_ << menu::string(wm::command::exit, "Exit");
+		menu_ << menu::string(wm::command::exit, "Exit");
 		// メニュー１
-		*menu_ << menu::submenu( wm::command::action_type1, "ActionType1");
+		menu_ << menu::submenu( wm::command::action_type1, "ActionType1");
 		{
-			auto submenu = menu_->get_submenu(wm::command::action_type1);
+			auto submenu = menu_.get_submenu(wm::command::action_type1);
 			*submenu
 				<< menu::string( wm::command::action_type1_1, "Action1-1")
 				<< menu::string( wm::command::action_type1_2, "Action1-2")
 			;
 		}
 		// メニュー２
-		*menu_ << menu::submenu( wm::command::action_type2, "ActionType2");
+		menu_ << menu::submenu( wm::command::action_type2, "ActionType2");
 		{
-			auto submenu = menu_->get_submenu(wm::command::action_type2);
+			auto submenu = menu_.get_submenu(wm::command::action_type2);
 			*submenu
 				<< menu::string( wm::command::action_type2_1, "Action2-1")
 				<< menu::string( wm::command::action_type2_2, "Action2-2")
@@ -213,7 +211,7 @@ private:
 
 private:
 	window wnd_;
-	menu_ptr menu_;
+	menu menu_;
 
 	io_service ios_;
 	work_handler work_;  // ループのキー

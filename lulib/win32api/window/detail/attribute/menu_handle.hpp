@@ -5,22 +5,25 @@
 
 #include <lulib/win32api/menu/basic_menu.hpp>
 
+#include <boost/optional.hpp>
+
 namespace lulib { namespace win32api { namespace window_detail { namespace attribute {
 
 	// Menu型
 	template<HMENU (WINAPI *C)(), typename Char = TCHAR>
 	class basic_menu_handle {
 		// メニュー型
-		typedef lulib::win32api::basic_menu<C,Char> menu;
-		typedef std::shared_ptr<menu> menu_ptr;
+		typedef lulib::win32api::basic_menu<C,Char> menu_type;
+		typedef boost::optional<menu_type&> menu_opt;
 
 	public:
-		basic_menu_handle(menu_ptr menu) : menu_(menu) {}
+		basic_menu_handle() : menu_() {}
+		basic_menu_handle(menu_type &m) : menu_(m) {}
 
-		inline operator menu_ptr() { return menu_; }
+		inline menu_opt& operator()() { return menu_; }
 
 	private:
-		menu_ptr menu_;
+		menu_opt menu_;
 	};
 
 }}}}// namespace lulib::win32api::window::attribute

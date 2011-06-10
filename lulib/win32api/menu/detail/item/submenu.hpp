@@ -77,12 +77,17 @@ namespace lulib { namespace win32api { namespace menu_detail { namespace item {
 			throw ra_error("failed to insert submenu ptr.");
 		}
 		// サブメニューを登録
-		i.mii_.submenu( *(result.first->second) );
+		typename menu_type::submenu_type &submenu = *result.first->second;
+		i.mii_.submenu( submenu );
 
 		// メニューアイテムを挿入
 		if ( policy<Char>::insert_menu_item(menu, i.idx_, true, i.mii_) != TRUE ) {
 			throw ra_error("failed to insert menu item.");
 		}
+
+		// 親HMENUと位置情報をセット
+		submenu.set_parent(menu, i.idx_, MF_BYPOSITION);
+
 		return menu;
 	}
 

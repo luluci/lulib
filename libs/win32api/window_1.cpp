@@ -40,20 +40,19 @@ int WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int cmdShow) {
 
 	// メニュー作成
 	typedef lulib::win32api::menu menu;
-	typedef std::shared_ptr<menu> menu_ptr;
-	menu_ptr m( new menu() );
+	menu m;
 	// menu0
-	*m << menu::string(0, "menu-0");
-	*m << menu::defitem(0);
+	m << menu::string(0, "menu-0");
+	m << menu::defitem(0);
 	// menu1
-	*m << menu::string(1, "menu-1");
-	*m << menu::disabled(1);
+	m << menu::string(1, "menu-1");
+	m << menu::disabled(1);
 	// separator
-	*m << menu::separator(2);
+	m << menu::separator(2);
 	// menu2
-	*m << menu::submenu(3, "submenu-2");
+	m << menu::submenu(3, "submenu-2");
 	{
-		auto sm = m->get_submenu(3);
+		auto sm = m.get_submenu(3);
 		*sm << menu::string(4, "menu-2-0");
 		*sm << menu::checked(4);
 		*sm << menu::separator(5);
@@ -67,8 +66,8 @@ int WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int cmdShow) {
 		}
 		*sm << menu::menu(9, "menu-2-2");
 	}
-	*m << menu::menu(10, "menu-3");
-	*m << menu::hilite(10);
+	m << menu::menu(10, "menu-3");
+	m << menu::hilite(10);
 
 	/*
 	WNDCLASSEX wc;

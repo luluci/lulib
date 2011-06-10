@@ -16,6 +16,8 @@
 
 #include <lulib/type_traits/char_traits.hpp>
 
+#include <boost/foreach.hpp>
+
 namespace lulib { namespace win32api {
 
 	namespace window_detail {
@@ -34,13 +36,38 @@ namespace lulib { namespace win32api {
 			typedef HMENU pointer;
 			void operator()(HMENU hMenu) {
 				// ウィンドウに割り当てられていないなら手動削除
-				if (!is_assigned_) ::DestroyMenu(hMenu);
+				::DestroyMenu(hMenu);
+			}
+		};
+
+		// 自分が親メニュー(hMenu)で、破棄されるとき、子メニューの割り当てを外す
+		template<typename Container>
+		struct HMENU_child_handler {
+			typedef HMENU pointer;
+			void operator()(HMENU hParentMenu) {
+				// 子を外す
+				BOOST_FOREACH(auto &pair, c_) {
+					::RemoveMenu(hParentMenu, pair.first, MF_BYCOMMAND);
+				}
 			}
 
-			HMENU_deleter(bool &is_assigned) : is_assigned_(is_assigned) {}
+			HMENU_child_handler(Container &c) : c_(c) {}
 
-		private:
-			bool &is_assigned_;
+			Container &c_;
+		};
+
+		// 自分が子メニュー(hMenu)で、破棄されるとき、親メニューから自分を取り除く
+		struct HMENU_parent_handler {
+			typedef HMENU pointer;
+			void operator()(HMENU hParentMenu) {
+				// 自分を取り除く
+				::RemoveMenu(hParentMenu, pos_, flag_);
+			}
+
+			HMENU_parent_handler() : pos_(), flag_() {}
+			HMENU_parent_handler(std::size_t pos, std::size_t flag) : pos_(pos), flag_(flag) {}
+
+			std::size_t pos_, flag_;
 		};
 
 		// メニュークラス
@@ -59,14 +86,6 @@ namespace lulib { namespace win32api {
 			// MenuItemInfo型
 			typedef basic_menu_item_info<Char> menu_item_info;
 
-			// HMENUハンドラ
-			// これは共有しないよ！
-#ifdef _MSC_VER
-			typedef std::unique_ptr<HMENU, HMENU_deleter> menu_ptr;
-#else
-			typedef std::unique_ptr< std::remove_pointer<HMENU>::type, HMENU_deleter> menu_ptr;
-#endif
-
 			// サブメニュー
 			typedef basic_menu< ::CreatePopupMenu > submenu_type;
 			typedef std::shared_ptr< submenu_type > submenu_ptr;
@@ -75,30 +94,61 @@ namespace lulib { namespace win32api {
 			// メニューIDとその箇所のメニューハンドラ
 			typedef std::map< std::size_t, submenu_ptr > container;
 
+			// HMENUハンドラ
+			// これは共有しないよ！
+			// GCCのunique_ptrがくさってるので
+			//typedef std::unique_ptr<HMENU, HMENU_deleter> menu_ptr;
+			typedef std::unique_ptr< std::remove_pointer<HMENU>::type, HMENU_deleter> menu_ptr;
+
+			// 子メニューハンドラ
+			typedef std::unique_ptr<
+				std::remove_pointer<HMENU>::type,
+				HMENU_child_handler<container>
+			> child_handler;
+
+			// 親メニューハンドラ
+			typedef std::unique_ptr< std::remove_pointer<HMENU>::type, HMENU_parent_handler> parent_handler;
+
 		public:
 			basic_menu(void)
-			: menu_ptr_( create_menu(), HMENU_deleter(is_assigned_) )
-			, c_(), is_assigned_(false)
+			: menu_ptr_( create_menu() ), c_()
+			, child_handler_(0, HMENU_child_handler<container>(c_))
+			, parent_handler_()
 			{
 				if (!menu_ptr_) {
 					throw ra_error("faild to CreateMenu().");
 				}
 			}
 			basic_menu(self_type &&obj)
-			: menu_ptr_( std::move(obj.menu_ptr_) )
-			, c_( std::move(obj.c_) )
-			, is_assigned_( obj.is_assigned_ )
-			{
-			}
+			: menu_ptr_( std::move(obj.menu_ptr_) ), c_( std::move(obj.c_) )
+			, child_handler_( obj.child_handler_ ) , parent_handler_( obj.parent_handler_ )
+			{}
+
+			/*
 			self_type& operator=(self_type &&obj) {
 				menu_ptr_ = std::move(obj.menu_ptr_);
 				c_ = std::move(obj.c_);
-				is_assigned_ = obj.is_assigned_;
+				parent_ = obj.parent_;
 				return *this;
 			}
+			*/
+
+			void swap(self_type &obj) {
+				std::swap( menu_ptr_, obj.menu_ptr_ );
+				std::swap( c_, obj.c_ );
+				std::swap( child_handler_, obj.child_handler_ );
+				std::swap( parent_handler_, obj.parent_handler_ );
+			}
+
 		private:
 			basic_menu(self_type const& obj);
 			self_type& operator=(self_type const& obj);
+
+		private:
+			void set_parent(HMENU hParentMenu, std::size_t pos, std::size_t flag) {
+				parent_handler_.reset(hParentMenu);
+				parent_handler_.get_deleter() = HMENU_parent_handler(pos, flag);
+			}
 
 		public:
 			inline operator HMENU() { return menu_ptr_.get(); }
@@ -175,9 +225,11 @@ namespace lulib { namespace win32api {
 			menu_ptr menu_ptr_;
 			// サブメニューコンテナ
 			container c_;
-			// HWND or HMENU に割り当てられているか
-			// 割り当てられている場合、自動で解放される
-			bool is_assigned_;
+			// 
+			child_handler child_handler_;
+			// HMENUに関連付けられているか
+			// 割り当てられている場合、thisのデストラクト時に関連付けを解除
+			parent_handler parent_handler_;
 
 		};
 	}// namespace lulib::win32api::menu_detail

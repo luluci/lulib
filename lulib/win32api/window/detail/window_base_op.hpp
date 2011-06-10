@@ -28,7 +28,7 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 		// hParentが
 		//   NULL以外: wndは子ウィンドウになる
 		//   NULL    : wndは親ウィンドウを持たない
-		wnd.is_child_ = (hParent() != 0);
+		if (wnd.hParent_ != NULL) wnd.child_handler_.reset( wnd.wnd_ptr_.get() );
 		// すでにウィンドウが作成されているなら、hParentの更新を適用
 		if (wnd.wnd_ptr_) {
 			::SetParent(wnd.wnd_ptr_.get(), wnd.hParent_);
@@ -41,29 +41,33 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 	// メニューハンドルの場合
 	template<typename Derived, HMENU (WINAPI *C)(), typename Char>
 	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, basic_menu_handle<C,Char> &&menu) {
-		// すでに割り当てられているメニューがあった場合、未割り当てに設定
-		if (wnd.menu_ptr_) {
-			wnd.menu_ptr_->is_assigned_ = false;
+		// menuがセットされていたら
+		auto menu_opt = menu();  // optional<menu>
+		if (menu_opt) {
+			// menuを更新
+			wnd.hMenu_ = *menu_opt;
 		}
-		// menuを更新
-		wnd.menu_ptr_ = menu;
-		// 割り当てに設定
-		wnd.menu_ptr_->is_assigned_ = true;
+		// nullなら
+		else {
+			wnd.hMenu_ = 0;
+		}
 		// すでにウィンドウが作成されているなら、hParentの更新を適用
 		if (wnd.wnd_ptr_) {
-			::SetMenu(wnd.wnd_ptr_.get(), *wnd.menu_ptr_);
+			::SetMenu(wnd.wnd_ptr_.get(), wnd.hMenu_);
 		}
 		// 終了
 		return wnd;
 	}
-	// ウインドウIDの場合
+
+	// 子ウィンドウIDを適用
 	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, HMENU wnd_id) {
-		// IDとNullDeleterを指定
-		wnd.menu_ptr_ = typename window_base<Derived,Char>::menu_ptr(
-			reinterpret_cast< typename window_base<Derived,Char>::menu_type* >(wnd_id),
-			[](typename window_base<Derived,Char>::menu_type*){}
-		);
+	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, child_window_id &&wnd_id) {
+		// IDを指定
+		wnd.hMenu_ = reinterpret_cast<HMENU>(wnd_id());
+		// すでにウィンドウが作成されているなら、IDの更新を適用
+		if (wnd.wnd_ptr_) {
+			policy<Char>::set_window_long_ptr( wnd.wnd_ptr_.get(), GWLP_ID, wnd.hMenu_ );
+		}
 		// 終了
 		return wnd;
 	}
