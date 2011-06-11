@@ -66,7 +66,9 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 		wnd.hMenu_ = reinterpret_cast<HMENU>(wnd_id());
 		// すでにウィンドウが作成されているなら、IDの更新を適用
 		if (wnd.wnd_ptr_) {
-			policy<Char>::set_window_long_ptr( wnd.wnd_ptr_.get(), GWLP_ID, wnd.hMenu_ );
+			policy<Char>::set_window_long_ptr(
+				wnd.wnd_ptr_.get(), GWLP_ID, reinterpret_cast<LONG_PTR>(wnd.hMenu_)
+			);
 		}
 		// 終了
 		return wnd;
@@ -87,7 +89,7 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 
 	// windowへExStyleを適用
 	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, ex_style && s) {
+	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, ex_style &&s) {
 		// ex_styleを更新
 		switch (s.mode()) {
 			case ex_style::modes::subst: {

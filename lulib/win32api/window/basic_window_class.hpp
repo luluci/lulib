@@ -3,6 +3,7 @@
 
 #include <windows.h>
 
+#include <lulib/win32api/window/basic_window_fwd.hpp>
 #include <lulib/win32api/window/detail/procedure.hpp>
 #include <lulib/win32api/window/detail/policy.hpp>
 
@@ -25,6 +26,9 @@ namespace lulib { namespace win32api {
 			typedef ::lulib::win32api::window_detail::policy<Char> policy;
 			typedef typename policy::wnd_class wnd_class;
 
+			// window
+			typedef basic_window<Char> window_type;
+
 		public:
 			basic_window_class() : wc_(), class_name_() {
 				init();
@@ -41,7 +45,8 @@ namespace lulib { namespace win32api {
 			void init() {
 				wc_.cbSize        = sizeof(wnd_class);
 				wc_.style         = styles::h_redraw | styles::v_redraw;
-				wc_.lpfnWndProc   = (WNDPROC)procedure<Char>;
+				WNDPROC proc = procedure<window_type,char_type>;
+				wc_.lpfnWndProc   = proc;
 				wc_.hCursor       = LoadCursor(NULL,IDC_ARROW);
 				wc_.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
 			}

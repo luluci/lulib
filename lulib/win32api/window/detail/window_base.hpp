@@ -5,6 +5,8 @@
 
 #include <memory>
 #include <functional>
+#include <type_traits>
+
 
 #include <lulib/win32api/window/detail/window_base_op.hpp>
 #include <lulib/win32api/window/detail/policy.hpp>
@@ -57,6 +59,8 @@ namespace lulib { namespace win32api { namespace window_detail {
 
 		// windowポリシー
 		typedef ::lulib::win32api::window_detail::policy<Char> policy;
+		// policyは派生クラスでhidingされるので、一応
+		typedef ::lulib::win32api::window_detail::policy<Char> wnd_policy;
 
 		// HWNDハンドラ
 		// HWNDが生きたままwindow_baseが破棄されるとき、デリータが呼ばれる
@@ -70,11 +74,14 @@ namespace lulib { namespace win32api { namespace window_detail {
 		// 自分が子ウィンドウの場合、破棄されるときには親ウィンドウとの関連を外す
 		typedef std::unique_ptr< std::remove_pointer<HWND>::type, HWND_handler> child_handler;
 
+		// ウィンドウプロシージャコールバック
+		typedef std::function<LRESULT(HWND,UINT,WPARAM,LPARAM)> procedure_type;
+
 	public:
 		window_base()
-			: wnd_ptr_(), ex_style_(), class_name_(), window_name_()
-			, style_(WS_OVERLAPPEDWINDOW), x_(), y_(), w_(), h_(), hParent_()
-			, hMenu_(), hInst_(), child_handler_()
+			: wnd_ptr_(), ex_style_(0), class_name_(), window_name_()
+			, style_(WS_OVERLAPPEDWINDOW), x_(0), y_(0), w_(0), h_(0), hParent_(NULL)
+			, hMenu_(NULL), hInst_(NULL), proc_(), child_handler_()
 		{
 		}
 		virtual ~window_base() {
@@ -105,6 +112,7 @@ namespace lulib { namespace win32api { namespace window_detail {
 			std::swap( hParent_, obj.hParent_ );
 			std::swap( hMenu_, obj.hMenu_ );
 			std::swap( hInst_, obj.hInst_ );
+			std::swap( proc_, obj.proc_ );
 			std::swap( child_handler_, obj.child_handler_ );
 		}
 
@@ -122,8 +130,8 @@ namespace lulib { namespace win32api { namespace window_detail {
 	public:
 		// リソース類の作成編
 
-		// ウィンドウハンドルが::DestroyWindowで破棄されたのを受けて
-		// ウィンドウハンドルを無効にする
+		// dtor以外でHWNDが破棄されたときに呼ばれる
+		// HWNDハンドラを無効にする
 		inline void disable() {
 			// デリータを呼ばずにポインタを解放
 			wnd_ptr_.release();
@@ -231,6 +239,7 @@ namespace lulib { namespace win32api { namespace window_detail {
 		HWND hParent_;             // 親ウィンドウハンドル
 		HMENU hMenu_;              // HMENU : nullを許容
 		HINSTANCE hInst_;          // HINSTANCE
+		procedure_type proc_;      // ウィンドウプロシージャ
 		child_handler child_handler_;            // 子ウィンドウであるかどうか
 	};
 }}}//namespace lulib::win32api::window_detail

@@ -74,6 +74,15 @@ public:
 		*/
 
 		public:
+			// プロシージャの呼び出し
+			inline LRESULT callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+				// プロシージャがセットされているなら実行
+				if (proc_) return proc_(hWnd, msg, wParam, lParam);
+				// プロシージャがセットされていないなら、DefWindowProcにまかせる
+				//else return policy::def_window_proc(hWnd, msg, wParam, lParam);
+			}
+
+		public:
 			// swap
 			void swap(self_type &obj) throw() {
 				this->base_type::swap(obj);

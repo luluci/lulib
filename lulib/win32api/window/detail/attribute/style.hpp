@@ -30,9 +30,6 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 		friend style&& operator+(style &&attr);
 		friend style&& operator-(style &&attr);
 
-		template<typename Char>
-		friend basic_window<Char>& operator<<(basic_window<Char>&, style&&);
-
 	private:
 		std::size_t style_;
 		modes::enum_t mode_;

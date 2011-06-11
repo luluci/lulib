@@ -14,6 +14,13 @@ namespace lulib { namespace win32api { namespace window_detail {
 		// WNDCLASSEX
 		typedef WNDCLASSEXA wnd_class;
 
+		// ::DefWindowProc
+		//inline static LRESULT def_window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+		//	return ::DefWindowProcA(hWnd, Msg, wParam, lParam);
+		//}
+		typedef LRESULT (CALLBACK* wnd_proc)(HWND,UINT,WPARAM,LPARAM);
+		static const wnd_proc default_procedure;
+
 		// ::RegisterClassEx
 		inline static ATOM register_class(wnd_class *wc) {
 			return ::RegisterClassExA(wc);
@@ -47,11 +54,6 @@ namespace lulib { namespace win32api { namespace window_detail {
 			);
 		}
 
-		// ::DefWindowProc
-		inline static LRESULT def_window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
-			return ::DefWindowProcA(hWnd, Msg, wParam, lParam);
-		}
-
 		// ::GetWindowLongPtr
 		inline static LONG_PTR get_window_long_ptr(HWND hWnd, int nIndex) {
 			return ::GetWindowLongPtrA(hWnd, nIndex);
@@ -75,11 +77,19 @@ namespace lulib { namespace win32api { namespace window_detail {
 		}
 
 	};
+	const policy<char>::wnd_proc policy<char>::default_procedure = ::DefWindowProcA;
 
 	template<>
 	struct policy<wchar_t> {
 		// WNDCLASSEX
 		typedef WNDCLASSEXW wnd_class;
+
+		// ::DefWindowProc
+		//inline static LRESULT def_window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
+		//	return ::DefWindowProcW(hWnd, Msg, wParam, lParam);
+		//}
+		typedef LRESULT (CALLBACK* wnd_proc)(HWND,UINT,WPARAM,LPARAM);
+		static const wnd_proc default_procedure;
 
 		// ::RegisterClassEx
 		inline static ATOM register_class(wnd_class *wc) {
@@ -114,11 +124,6 @@ namespace lulib { namespace win32api { namespace window_detail {
 			);
 		}
 
-		// ::DefWindowProc
-		inline static LRESULT def_window_proc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) {
-			return ::DefWindowProcW(hWnd, Msg, wParam, lParam);
-		}
-
 		// ::GetWindowLongPtr
 		inline static LONG_PTR get_window_long_ptr(HWND hWnd, int nIndex) {
 			return ::GetWindowLongPtrW(hWnd, nIndex);
@@ -142,5 +147,6 @@ namespace lulib { namespace win32api { namespace window_detail {
 		}
 
 	};
+	const policy<wchar_t>::wnd_proc policy<wchar_t>::default_procedure = ::DefWindowProcW;
 
 }}}// namespace lulib::win32api::window_detail
