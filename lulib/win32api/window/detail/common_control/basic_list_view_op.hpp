@@ -13,7 +13,8 @@ namespace lulib { namespace win32api { namespace window_detail { namespace commo
 
 	// windowへExStyleを適用
 	template<typename Char>
-	basic_list_view<Char>& operator<<(basic_list_view<Char>& lv, ex_style && s) {
+	typename basic_list_view<Char>::window_type&
+	operator<<(basic_list_view<Char>& lv, ex_style && s) {
 		typedef list_view_policy<Char> policy;
 
 		// ex_styleを更新
@@ -36,24 +37,28 @@ namespace lulib { namespace win32api { namespace window_detail { namespace commo
 			policy::set_ex_style(lv, lv.lv_ex_style_);
 		}
 		// 終了
-		return lv;
+		typedef typename basic_list_view<Char>::window_type window_type;
+		return dynamic_cast<window_type&>(lv);
 	}
 
 	// column
 	template<typename Char>
-	basic_list_view<Char>& operator<<(basic_list_view<Char>& lv, basic_list_view_column<Char> const& col) {
+	typename basic_list_view<Char>::window_type&
+	operator<<(basic_list_view<Char>& lv, basic_list_view_column<Char> const& col) {
 		typedef list_view_policy<Char> policy;
 		int result = policy::insert_column(lv, col.index(), col);
 		if (result == -1) {
 			throw ra_error("failed to ListView_InsertColumn()");
 		}
 		// 終了
-		return lv;
+		typedef typename basic_list_view<Char>::window_type window_type;
+		return dynamic_cast<window_type&>(lv);
 	}
 
 	// item
 	template<typename Char>
-	basic_list_view<Char>& operator<<(basic_list_view<Char>& lv, basic_list_view_item<Char> const& item) {
+	typename basic_list_view<Char>::window_type&
+	operator<<(basic_list_view<Char>& lv, basic_list_view_item<Char> const& item) {
 		typedef list_view_policy<Char> policy;
 		int result;
 		// 1列目ならinsert
@@ -68,7 +73,8 @@ namespace lulib { namespace win32api { namespace window_detail { namespace commo
 			throw ra_error("failed to ListView_SetItem()");
 		}
 		// 終了
-		return lv;
+		typedef typename basic_list_view<Char>::window_type window_type;
+		return dynamic_cast<window_type&>(lv);
 	}
 
 }}}}// namespace lulib::win32api::window_detail::common_control

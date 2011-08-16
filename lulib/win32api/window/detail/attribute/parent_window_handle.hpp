@@ -8,9 +8,9 @@
 namespace lulib { namespace win32api { namespace window_detail { namespace attribute {
 
 	// HWND型
-	template<typename Derived, typename Char = TCHAR>
+	template<typename Derived, typename Window, typename Char = TCHAR>
 	class basic_parent_window_handle {
-		typedef window_base<Derived,Char> window;
+		typedef window_base<Derived,Window,Char> window;
 
 	public:
 		// デフォルトコンストラクタの場合、

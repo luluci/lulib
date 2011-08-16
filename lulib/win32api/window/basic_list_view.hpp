@@ -17,10 +17,12 @@ namespace lulib { namespace win32api {
 	namespace window_detail {
 
 		template<typename Char = TCHAR>
-		class basic_list_view : public window_base<basic_list_view<Char>, Char> {
+		class basic_list_view : public window_base<basic_list_view<Char>, basic_list_view<Char>, Char> {
 			typedef basic_list_view<Char> self_type;
 			// 基底クラス型
-			typedef window_base<basic_list_view<Char>, Char> base_type;
+			typedef window_base<self_type, self_type, Char> base_type;
+			// どのタイプのウィンドウか
+			typedef self_type window_type;
 
 			// ListViewポリシー
 			typedef common_control::list_view_policy<Char> lv_policy;
@@ -53,7 +55,7 @@ namespace lulib { namespace win32api {
 			}
 
 #ifndef __GNUC__
-			template<typename T, typename U> friend class window_base;
+			template<typename D, typename W, typename C> friend class window_base;
 #else
 public:
 #endif
@@ -74,15 +76,6 @@ public:
 		*/
 
 		public:
-			// プロシージャの呼び出し
-			inline LRESULT callback(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-				// プロシージャがセットされているなら実行
-				if (proc_) return proc_(hWnd, msg, wParam, lParam);
-				// プロシージャがセットされていないなら、DefWindowProcにまかせる
-				//else return policy::def_window_proc(hWnd, msg, wParam, lParam);
-			}
-
-		public:
 			// swap
 			void swap(self_type &obj) throw() {
 				this->base_type::swap(obj);
@@ -95,16 +88,16 @@ public:
 			// ウィンドウ作成後にしか操作は意味が無い
 			typedef common_control::ex_style lv_ex_style;
 			template<typename T>
-			friend basic_list_view<T>& common_control::operator<<(
-				basic_list_view<T>&, common_control::ex_style &&);
+			friend typename basic_list_view<T>::window_type&
+			common_control::operator<<(basic_list_view<T>&, common_control::ex_style &&);
 			// columnの操作
 			template<typename T>
-			friend basic_list_view<T>& common_control::operator<<(
-				basic_list_view<T>&, common_control::basic_list_view_column<T> const&);
+			friend typename basic_list_view<T>::window_type&
+			common_control::operator<<(basic_list_view<T>&, common_control::basic_list_view_column<T> const&);
 			// itemの操作
 			template<typename T>
-			friend basic_list_view<T>& common_control::operator<<(
-				basic_list_view<T>&, common_control::basic_list_view_item<T> const&);
+			friend typename basic_list_view<T>::window_type&
+			common_control::operator<<(basic_list_view<T>&, common_control::basic_list_view_item<T> const&);
 
 		private:
 			// ListView Ex Style

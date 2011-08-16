@@ -3,7 +3,7 @@
 
 #include <windows.h>
 
-#include <lulib/win32api/window/detail/policy.hpp>
+#include <lulib/win32api/window/detail/window_policy.hpp>
 
 namespace lulib { namespace win32api { namespace window_detail {
 
@@ -13,13 +13,15 @@ namespace lulib { namespace win32api { namespace window_detail {
 		// window型
 		typedef Window window_type;
 		// Windowポリシー
-		typedef policy<Char> policy;
+		typedef window_policy<Char> wnd_policy;
 
 		// USERDATAを取得
-		LONG_PTR ptr = policy::get_window_long_ptr(hWnd, GWLP_USERDATA);
+		LONG_PTR ptr = wnd_policy::get_window_long_ptr(hWnd, GWLP_USERDATA);
 
-		// 0ならDefWindowProcにまかせる
-		if (ptr == 0) return policy::default_procedure(hWnd, msg, wParam, lParam);
+		// 0ならDefaultProcedureに任せる
+		if (ptr == 0) {
+			return Window::default_procedure(hWnd, msg, wParam, lParam);
+		}
 
 		// 値があれば、一部のメッセージを処理
 		// ポインタを取得

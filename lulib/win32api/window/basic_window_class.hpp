@@ -5,7 +5,7 @@
 
 #include <lulib/win32api/window/basic_window_fwd.hpp>
 #include <lulib/win32api/window/detail/procedure.hpp>
-#include <lulib/win32api/window/detail/policy.hpp>
+#include <lulib/win32api/window/detail/window_policy.hpp>
 
 #include <lulib/type_traits/char_traits.hpp>
 
@@ -23,7 +23,7 @@ namespace lulib { namespace win32api {
 			typedef typename char_traits::string_type string_type;
 
 			// windowポリシー
-			typedef ::lulib::win32api::window_detail::policy<Char> policy;
+			typedef window_policy<Char> policy;
 			typedef typename policy::wnd_class wnd_class;
 
 			// window

@@ -11,6 +11,44 @@
 #include <lulib/win32api/window.hpp>
 #include <lulib/win32api/static_text.hpp>
 
+struct static_text_proc {
+	typedef lulib::win32api::static_text stext;
+	stext &stext_;
+	static_text_proc(stext &st) : stext_(st) {}
+
+	LRESULT operator()(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+		switch (msg) {
+			case WM_COMMAND: {
+				std::size_t menu_id = LOWORD(wParam);
+				std::string message;
+				std::stringstream ss;
+				ss << "static_text_proc:: MenuID:" << menu_id;
+				message = ss.str();
+				MessageBoxA(hWnd, message.c_str(), "check", MB_OK);
+				return 0;
+			}
+			case WM_CTLCOLORSTATIC: {
+				::MessageBoxA(0, "WM", "test", 0);
+				HDC hdc = ::GetDC( hWnd );
+				::SetBkMode(hdc, TRANSPARENT);
+				::ReleaseDC(hWnd, hdc);
+				return (LRESULT)::GetStockObject(NULL_BRUSH);
+			}
+		}
+		return stext_.default_procedure(hWnd, msg, wParam, lParam);
+	}
+};
+
+/*
+window_5.cpp:96:63: error: ambiguous overload for ‘operator<<’ in ‘
+	((my_window*)this)->my_window::text_2_ << lulib::win32api::window_detail::common_control::subclass(
+		(* & std::function<wnd_proc>(
+			static_text_proc(
+				(* &((my_window*)this)->my_window::text_2_)
+			),
+			(std::function<wnd_proc>::_Useless(), std::function<wnd_proc>::_Useless()))))’
+*/
+
 class my_window {
 	// ウィンドウ型
 	typedef lulib::win32api::window_class window_class;
@@ -55,14 +93,15 @@ public:
 			<< static_text::style(WS_VISIBLE | WS_CHILD | SS_NOTIFY)
 			<< static_text::instance(hInst)
 			<< static_text::parent(wnd_)
+			<< static_text::subclass( static_text_proc(text_1_) )
 			<< static_text::pos(10, 10, 100, 50);
-			//<< static_text::subclass( static_text_proc(text1) )
 		text_1_.create();
 		text_2_ << static_text::title("static control 2")
 			<< static_text::wnd_id(2)
 			<< static_text::style(WS_VISIBLE | WS_CHILD)
 			<< static_text::instance(hInst)
 			<< static_text::parent(wnd_)
+			<< static_text::subclass( static_text_proc(text_2_) )
 			<< static_text::pos(10, 70, 100, 50);
 		text_2_.create();
 
@@ -105,25 +144,6 @@ private:
 private:
 	window wnd_;
 	static_text text_1_, text_2_;
-};
-
-struct static_text_proc {
-	typedef lulib::win32api::static_text stext;
-	stext &stext_;
-	static_text_proc(stext &st) : stext_(st) {}
-
-	LRESULT operator()(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-		switch (msg) {
-			case WM_CTLCOLORSTATIC: {
-				::MessageBoxA(0, "WM", "test", 0);
-				HDC hdc = ::GetDC( hWnd );
-				::SetBkMode(hdc, TRANSPARENT);
-				::ReleaseDC(hWnd, hdc);
-				return (LRESULT)::GetStockObject(NULL_BRUSH);
-			}
-		}
-		return stext_.default_proc(hWnd, msg, wParam, lParam);
-	}
 };
 
 int WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR cmdLine, int cmdShow) {

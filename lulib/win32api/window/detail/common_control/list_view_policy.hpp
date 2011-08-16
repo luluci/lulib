@@ -6,7 +6,7 @@
 
 namespace lulib { namespace win32api { namespace window_detail { namespace common_control {
 
-	// Windowポリシー
+	// ListViewポリシー
 	template<typename Char>
 	struct list_view_policy;
 

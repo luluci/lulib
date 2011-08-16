@@ -3,26 +3,31 @@
 
 #include <lulib/win32api/window/detail/window_base_fwd.hpp>
 #include <lulib/win32api/window/detail/attributes.hpp>
-#include <lulib/win32api/window/detail/policy.hpp>
+#include <lulib/win32api/window/detail/window_policy.hpp>
 
 namespace lulib { namespace win32api { namespace window_detail { namespace attribute {
 
 	// windowへhInstanceを適用
-	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, instance_handle &&hInst) {
+	template<typename Derived, typename Window, typename Char>
+	typename window_base<Derived,Window,Char>::window_type&
+	operator<<(window_base<Derived,Window,Char>& wnd, instance_handle &&hInst) {
 		// hInstanceを更新
 		wnd.hInst_ = hInst;
 		// すでにウィンドウが作成されているなら、hInstanceの更新を適用
 		if (wnd.wnd_ptr_) {
-			policy<Char>::set_window_long_ptr( wnd.wnd_ptr_.get(), GWLP_HINSTANCE, reinterpret_cast<LONG_PTR>(wnd.hInst_) );
+			window_policy<Char>::set_window_long_ptr(
+				wnd.wnd_ptr_.get(), GWLP_HINSTANCE, reinterpret_cast<LONG_PTR>(wnd.hInst_)
+			);
 		}
 		// 終了
-		return wnd;
+		typedef typename window_base<Derived,Window,Char>::window_type window_type;
+		return dynamic_cast<window_type&>(wnd);
 	}
 
 	// windowへhParentを適用
-	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, basic_parent_window_handle<Derived,Char> &&hParent) {
+	template<typename Derived, typename Window, typename Char>
+	typename window_base<Derived,Window,Char>::window_type&
+	operator<<(window_base<Derived,Window,Char>& wnd, basic_parent_window_handle<Derived,Window,Char> &&hParent) {
 		// hParentを更新
 		wnd.hParent_ = hParent;
 		// hParentが
@@ -34,13 +39,15 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 			::SetParent(wnd.wnd_ptr_.get(), wnd.hParent_);
 		}
 		// 終了
-		return wnd;
+		typedef typename window_base<Derived,Window,Char>::window_type window_type;
+		return dynamic_cast<window_type&>(wnd);
 	}
 
 	// windowへMenuを適用
 	// メニューハンドルの場合
-	template<typename Derived, HMENU (WINAPI *C)(), typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, basic_menu_handle<C,Char> &&menu) {
+	template<typename Derived, typename Window, HMENU (WINAPI *C)(), typename Char>
+	typename window_base<Derived,Window,Char>::window_type&
+	operator<<(window_base<Derived,Window,Char>& wnd, basic_menu_handle<C,Char> &&menu) {
 		// menuがセットされていたら
 		auto menu_opt = menu();  // optional<menu>
 		if (menu_opt) {
@@ -56,40 +63,46 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 			::SetMenu(wnd.wnd_ptr_.get(), wnd.hMenu_);
 		}
 		// 終了
-		return wnd;
+		typedef typename window_base<Derived,Window,Char>::window_type window_type;
+		return dynamic_cast<window_type&>(wnd);
 	}
 
 	// 子ウィンドウIDを適用
-	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, child_window_id &&wnd_id) {
+	template<typename Derived, typename Window, typename Char>
+	typename window_base<Derived,Window,Char>::window_type&
+	operator<<(window_base<Derived,Window,Char>& wnd, child_window_id &&wnd_id) {
 		// IDを指定
 		wnd.hMenu_ = reinterpret_cast<HMENU>(wnd_id());
 		// すでにウィンドウが作成されているなら、IDの更新を適用
 		if (wnd.wnd_ptr_) {
-			policy<Char>::set_window_long_ptr(
+			window_policy<Char>::set_window_long_ptr(
 				wnd.wnd_ptr_.get(), GWLP_ID, reinterpret_cast<LONG_PTR>(wnd.hMenu_)
 			);
 		}
 		// 終了
-		return wnd;
+		typedef typename window_base<Derived,Window,Char>::window_type window_type;
+		return dynamic_cast<window_type&>(wnd);
 	}
 
 	// windowへtitleを適用
-	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, basic_title<Char> &&t) {
+	template<typename Derived, typename Window, typename Char>
+	typename window_base<Derived,Window,Char>::window_type&
+	operator<<(window_base<Derived,Window,Char>& wnd, basic_title<Char> &&t) {
 		// titleを更新
 		wnd.window_name_ = t();
 		// すでにウィンドウが作成されているなら、titleの更新を適用
 		if (wnd.wnd_ptr_) {
-			policy<Char>::set_window_text( wnd.wnd_ptr_.get(), wnd.window_name_.c_str() );
+			window_policy<Char>::set_window_text( wnd.wnd_ptr_.get(), wnd.window_name_.c_str() );
 		}
 		// 終了
-		return wnd;
+		typedef typename window_base<Derived,Window,Char>::window_type window_type;
+		return dynamic_cast<window_type&>(wnd);
 	}
 
 	// windowへExStyleを適用
-	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, ex_style &&s) {
+	template<typename Derived, typename Window, typename Char>
+	typename window_base<Derived,Window,Char>::window_type&
+	operator<<(window_base<Derived,Window,Char>& wnd, ex_style &&s) {
 		// ex_styleを更新
 		switch (s.mode()) {
 			case ex_style::modes::subst: {
@@ -107,15 +120,17 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 		}
 		// すでにウィンドウが作成されているなら、ex_styleの更新を適用
 		if (wnd.wnd_ptr_) {
-			policy<Char>::set_window_long_ptr( wnd.wnd_ptr_.get(), GWL_EXSTYLE, wnd.ex_style_ );
+			window_policy<Char>::set_window_long_ptr( wnd.wnd_ptr_.get(), GWL_EXSTYLE, wnd.ex_style_ );
 		}
 		// 終了
-		return wnd;
+		typedef typename window_base<Derived,Window,Char>::window_type window_type;
+		return dynamic_cast<window_type&>(wnd);
 	}
 
 	// windowへstyleを適用
-	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, style &&s) {
+	template<typename Derived, typename Window, typename Char>
+	typename window_base<Derived,Window,Char>::window_type&
+	operator<<(window_base<Derived,Window,Char>& wnd, style &&s) {
 		// styleを更新
 		switch (s.mode()) {
 			case style::modes::subst: {
@@ -133,15 +148,17 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 		}
 		// すでにウィンドウが作成されているなら、ex_styleの更新を適用
 		if (wnd.wnd_ptr_) {
-			policy<Char>::set_window_long_ptr( wnd.wnd_ptr_.get(), GWL_STYLE, wnd.style_ );
+			window_policy<Char>::set_window_long_ptr( wnd.wnd_ptr_.get(), GWL_STYLE, wnd.style_ );
 		}
 		// 終了
-		return wnd;
+		typedef typename window_base<Derived,Window,Char>::window_type window_type;
+		return dynamic_cast<window_type&>(wnd);
 	}
 
 	// windowへpositionを適用
-	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, position &&p) {
+	template<typename Derived, typename Window, typename Char>
+	typename window_base<Derived,Window,Char>::window_type&
+	operator<<(window_base<Derived,Window,Char>& wnd, position &&p) {
 		// styleを更新
 		switch (p.mode()) {
 			case position::modes::subst: {
@@ -172,12 +189,14 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 			::MoveWindow( wnd.wnd_ptr_.get(), wnd.x_, wnd.y_, wnd.w_, wnd.h_, p.repaint() );
 		}
 		// 終了
-		return wnd;
+		typedef typename window_base<Derived,Window,Char>::window_type window_type;
+		return dynamic_cast<window_type&>(wnd);
 	}
 
 	// windowへsizeを適用
-	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, size &&s) {
+	template<typename Derived, typename Window, typename Char>
+	typename window_base<Derived,Window,Char>::window_type&
+	operator<<(window_base<Derived,Window,Char>& wnd, size &&s) {
 		// styleを更新
 		switch (s.mode()) {
 			case size::modes::subst: {
@@ -202,18 +221,21 @@ namespace lulib { namespace win32api { namespace window_detail { namespace attri
 			::MoveWindow( wnd.wnd_ptr_.get(), wnd.x_, wnd.y_, wnd.w_, wnd.h_, s.repaint() );
 		}
 		// 終了
-		return wnd;
+		typedef typename window_base<Derived,Window,Char>::window_type window_type;
+		return dynamic_cast<window_type&>(wnd);
 	}
 
 	// windowへrepaintを適用
-	template<typename Derived, typename Char>
-	window_base<Derived,Char>& operator<<(window_base<Derived,Char>& wnd, repaint_t &&) {
+	template<typename Derived, typename Window, typename Char>
+	typename window_base<Derived,Window,Char>::window_type&
+	operator<<(window_base<Derived,Window,Char>& wnd, repaint_t &&) {
 		// すでにウィンドウが作成されているなら、画面の更新
 		if (wnd.wnd_ptr_) {
-			policy<Char>::set_window_long_ptr( wnd.wnd_ptr_.get(), GWL_EXSTYLE, wnd.ex_style_ );
+			window_policy<Char>::set_window_long_ptr( wnd.wnd_ptr_.get(), GWL_EXSTYLE, wnd.ex_style_ );
 		}
 		// 終了
-		return wnd;
+		typedef typename window_base<Derived,Window,Char>::window_type window_type;
+		return dynamic_cast<window_type&>(wnd);
 	}
 
 }}}}// namespace lulib::win32api::window_detail::attribute

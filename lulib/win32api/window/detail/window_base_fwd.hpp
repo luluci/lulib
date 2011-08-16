@@ -4,6 +4,6 @@
 namespace lulib { namespace win32api { namespace window_detail {
 
 	// forward
-	template<typename Derived, typename Char> class window_base;
+	template<typename Derived, typename Window, typename Char> class window_base;
 
 }}}// namespace lulib::win32api::window_detail

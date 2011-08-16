@@ -7,10 +7,10 @@ namespace lulib { namespace win32api { namespace window_detail {
 
 	// Windowポリシー
 	template<typename Char>
-	struct policy;
+	struct window_policy;
 
 	template<>
-	struct policy<char> {
+	struct window_policy<char> {
 		// WNDCLASSEX
 		typedef WNDCLASSEXA wnd_class;
 
@@ -77,10 +77,10 @@ namespace lulib { namespace win32api { namespace window_detail {
 		}
 
 	};
-	const policy<char>::wnd_proc policy<char>::default_procedure = ::DefWindowProcA;
+	const window_policy<char>::wnd_proc window_policy<char>::default_procedure = ::DefWindowProcA;
 
 	template<>
-	struct policy<wchar_t> {
+	struct window_policy<wchar_t> {
 		// WNDCLASSEX
 		typedef WNDCLASSEXW wnd_class;
 
@@ -147,6 +147,6 @@ namespace lulib { namespace win32api { namespace window_detail {
 		}
 
 	};
-	const policy<wchar_t>::wnd_proc policy<wchar_t>::default_procedure = ::DefWindowProcW;
+	const window_policy<wchar_t>::wnd_proc window_policy<wchar_t>::default_procedure = ::DefWindowProcW;
 
 }}}// namespace lulib::win32api::window_detail

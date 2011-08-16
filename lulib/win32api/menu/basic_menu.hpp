@@ -21,12 +21,13 @@
 namespace lulib { namespace win32api {
 
 	namespace window_detail {
-		template<typename Derived, typename Char> class window_base;
+		template<typename Derived, typename Window, typename Char> class window_base;
 
 		namespace attribute {
 			template<HMENU (WINAPI *C)(), typename Char> class basic_menu_handle;
-			template<typename Derived, HMENU (WINAPI *C)(), typename Char>
-			window_base<Derived,Char>& operator<<(window_base<Derived,Char>&, basic_menu_handle<C,Char> &&);
+			template<typename Derived, typename Window, HMENU (WINAPI *C)(), typename Char>
+			typename window_base<Derived,Window,Char>::window_type&
+			operator<<(window_base<Derived,Window,Char>&, basic_menu_handle<C,Char> &&);
 		}
 	}
 
@@ -215,9 +216,10 @@ namespace lulib { namespace win32api {
 			friend basic_menu<C,T>& state::operator<<(basic_menu<C,T>&, state::multi &&);
 
 			// WindowクラスへのMenu登録
-			template<typename D, HMENU (WINAPI *A)(), typename C>
-			friend window_detail::window_base<D,C>& window_detail::attribute::operator<<(
-				window_detail::window_base<D,C>&, window_detail::attribute::basic_menu_handle<A,C> &&);
+			template<typename D, typename W, HMENU (WINAPI *A)(), typename C>
+			friend typename window_detail::window_base<D,W,C>::window_type&
+			window_detail::attribute::operator<<(
+				window_detail::window_base<D,W,C>&, window_detail::attribute::basic_menu_handle<A,C> &&);
 
 		private:
 			// メニューハンドラ
