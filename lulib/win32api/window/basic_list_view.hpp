@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <commctrl.h>
 
+#include <lulib/win32api/window/detail/common_control/init_listview_classes.hpp>
 #include <lulib/win32api/window/detail/common_control/common_control_base.hpp>
 #include <lulib/win32api/window/detail/common_control/list_view_policy.hpp>
 #include <lulib/win32api/window/detail/common_control/basic_list_view_op.hpp>
@@ -51,10 +52,7 @@ namespace lulib { namespace win32api {
 		private:
 			void init() {
 				// コモンコントロールの初期化
-				INITCOMMONCONTROLSEX icc;
-				icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
-				icc.dwICC  = ICC_LISTVIEW_CLASSES;
-				InitCommonControlsEx(&icc);
+				common_control::init_listview_classes::init();
 			}
 
 #ifndef __GNUC__

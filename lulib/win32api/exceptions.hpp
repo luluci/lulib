@@ -9,7 +9,7 @@ namespace lulib {
 		// Resource Acquisition error
 		class ra_error : public std::runtime_error {
 		public:
-			ra_error(const std::string &what) : std::runtime_error(what) {}
+			ra_error(std::string const& what) : std::runtime_error(what) {}
 			~ra_error() throw() {}
 		};
 
