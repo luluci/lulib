@@ -30,6 +30,7 @@ namespace lulib { namespace win32api {
 			typedef typename char_traits::char_type   char_type;
 			typedef typename char_traits::string_type string_type;
 
+		public:
 			// windowポリシー
 			typedef window_policy<Char> policy;
 

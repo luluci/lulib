@@ -4,6 +4,7 @@
 #include <windows.h>
 
 #include <lulib/win32api/window/detail/window_base.hpp>
+#include <lulib/win32api/window/detail/common_control/common_control_op.hpp>
 #include <lulib/win32api/window/detail/common_control/subclass.hpp>
 
 #include <lulib/win32api/exceptions.hpp>
@@ -36,7 +37,7 @@ namespace lulib { namespace win32api { namespace window_detail { namespace commo
 		typedef WNDPROC_handler<Char> proc_handler;
 
 	protected:
-		common_control_base() : base_type() {}
+		common_control_base() : base_type(), cc_ex_style_(0) {}
 
 	private:
 		common_control_base(self_type const&);
@@ -52,20 +53,47 @@ public:
 		void on_create() {
 			// プロシージャがセットされていたらサブクラス化
 			if (this->proc_) {
-				//subclassing<Derived,Char>(*this);
 				subclassing<self_type,Char>(*this);
 			}
+			// on_create
+			on_create<Derived>();
 		}
+	private:
+		// ウィンドウ作成後の処理を呼び出す
+#ifdef __GNUC__
+		template< typename T, typename std::enable_if< lulib::type_traits::has_on_create<T>::value >::type *& = lulib::enabler >
+		inline void on_create() {
+			reinterpret_cast<Derived*>(this)->on_create();
+		}
+		template< typename T, typename std::enable_if< !lulib::type_traits::has_on_create<T>::value >::type *& = lulib::enabler >
+		inline void on_create() {}
+#else
+		template< typename T >
+		inline void on_create(typename std::enable_if< lulib::type_traits::has_on_create<T>::value >::type * = 0) {
+			reinterpret_cast<Derived*>(this)->on_create();
+		}
+		template< typename T >
+		inline void on_create(typename std::enable_if< !lulib::type_traits::has_on_create<T>::value >::type * = 0) {}
+#endif
+
 
 	public:
 		// swap
 		void swap(self_type &obj) throw() {
 			this->base_type::swap(obj);
+			std::swap( this->cc_ex_style_, obj.cc_ex_style_ );
 			std::swap( this->proc_handler_, obj.proc_handler_ );
 		}
 
 	public:
 		// friend関数
+		// CommonControl用 Ex Style の操作
+		// ウィンドウ作成後にしか操作は意味が無い
+		typedef common_control::ex_style cc_ex_style;
+		template<typename D, typename W, typename C>
+		friend typename common_control_base<D,W,C>::window_type&
+		operator<<(common_control_base<D,W,C>&, ex_style &&);
+		// サブクラス化
 		// operator<<
 		typedef common_control::subclass subclass;
 		template<typename D, typename W, typename C>
@@ -75,8 +103,8 @@ public:
 		template<typename T,typename U> friend void subclassing(T&);
 
 	protected:
-		// コモンコントロールデフォルトプロシージャハンドラ
-		proc_handler proc_handler_;
+		std::size_t cc_ex_style_;    // コモンコントロール用拡張スタイル
+		proc_handler proc_handler_;  // コモンコントロールデフォルトプロシージャハンドラ
 
 	};
 

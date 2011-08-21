@@ -92,7 +92,7 @@ public:
 		lv_.create();
 		lv_.show();
 		// ListViewExStyle‚ğİ’è
-		lv_ << list_view::lv_ex_style(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+		lv_ << list_view::cc_ex_style(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 		// —ñì¬
 		list_view::column col;
 		// —ñ1

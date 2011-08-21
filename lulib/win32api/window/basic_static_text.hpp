@@ -8,11 +8,9 @@
 #include <type_traits>
 #include <cstdint>
 
-//#include <lulib/win32api/window/detail/window_base.hpp>
 #include <lulib/win32api/window/detail/common_control/common_control_base.hpp>
 #include <lulib/win32api/window/detail/common_control/static_text_policy.hpp>
 //#include <lulib/win32api/window/detail/common_control/basic_static_text_op.hpp>
-//#include <lulib/win32api/window/detail/common_control/subclass.hpp>
 
 #include <lulib/win32api/exceptions.hpp>
 
@@ -27,8 +25,7 @@ namespace lulib { namespace win32api {
 		{
 			typedef basic_static_text<Char> self_type;
 			// 基底クラス型
-			typedef common_control::common_control_base
-				<basic_static_text<Char>, basic_static_text<Char>, Char> base_type;
+			typedef common_control::common_control_base<self_type, self_type, Char> base_type;
 			// 最上位派生クラス
 			// 大元のクラス
 			// どのタイプのウィンドウか
@@ -39,6 +36,7 @@ namespace lulib { namespace win32api {
 			typedef typename char_traits::char_type   char_type;
 			typedef typename char_traits::string_type string_type;
 
+		public:
 			// policy
 			typedef common_control::static_text_policy<Char> policy;
 
@@ -85,17 +83,12 @@ public:
 			// CreateWindowEx(), SetWindowLongPtr(hWnd,GWLP_USERDATA,this)
 			// の実行後に呼ばれる
 			void on_create() {
-				// プロシージャがセットされていたらサブクラス化
-				if (this->proc_) {
-					common_control::subclassing<self_type,Char>(*this);
-				}
 			}
 
 		public:
 			// swap
 			void swap(self_type &obj) throw() {
 				this->base_type::swap(obj);
-				std::swap( this->proc_handler_, obj.proc_handler_ );
 			}
 
 		};
