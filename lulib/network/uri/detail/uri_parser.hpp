@@ -75,8 +75,13 @@ namespace lulib { namespace network { namespace uri_detail {
 			);
 
 			// 3.2.3. Port
-			port_ = qi::as_string[ *qi::char_(digit) ][ phx::ref(parts.port) = qi::_1 ];
+			//port_ = qi::as_string[ *qi::char_(digit) ][ phx::ref(parts.port) = qi::_1 ];
 			//port_ = qi::int_[ phx::ref(parts.port) = qi::_1 ];
+			port_ = qi::as_string[
+				qi::raw[
+					qi::int_[ phx::ref(parts.port) = qi::_1 ]
+				]
+			][ phx::ref(parts.port_str) = qi::_1 ];
 
 			// 3.2.2. Host
 			// reg-name
@@ -123,9 +128,20 @@ namespace lulib { namespace network { namespace uri_detail {
 			) >> host_ >> -(':' >> port_);
 
 			// 3.1. スキーム
+			scheme_sym_.add("http", 80)("https", 443);
+			scheme_ = qi::as_string[
+				qi::raw[
+					qi::no_case[
+						scheme_sym_[ phx::ref(parts.port) = qi::_1 ]
+					]
+					| (qi::char_(alpha) >> *qi::char_(scheme_c))
+				]
+			][ phx::ref(parts.scheme) = qi::_1 ];
+			/*
 			scheme_ = qi::as_string[
 				qi::char_(alpha) >> *qi::char_(scheme_c)
 			][ phx::ref(parts.scheme) = qi::_1 ];
+			*/
 
 			// 3. 構文の構成要素
 			hier_part_ = (
@@ -140,6 +156,7 @@ namespace lulib { namespace network { namespace uri_detail {
 
 		typedef qi::rule<Iterator> base_rule;
 		typedef qi::rule<Iterator, string_type()> str_rule;
+		typedef qi::symbols<char_type, std::size_t> scheme_symbol;
 
 		// 3.
 		base_rule uri_;
@@ -148,6 +165,7 @@ namespace lulib { namespace network { namespace uri_detail {
 		str_rule fragment_;
 		// 3.1. Scheme
 		str_rule scheme_;
+		scheme_symbol scheme_sym_;
 		// 3.2. Authority
 		str_rule authority_;
 		str_rule userinfo_;

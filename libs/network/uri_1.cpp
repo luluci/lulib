@@ -13,6 +13,7 @@ void func(std::string const& str) {
 	std::cout << "user_info : " << uri.user_info() << std::endl;
 	std::cout << "host      : " << uri.host() << std::endl;
 	std::cout << "port      : " << uri.port() << std::endl;
+	std::cout << "port_str  : " << uri.port_str() << std::endl;
 	std::cout << "file      : " << uri.file() << std::endl;
 	std::cout << "query     : " << uri.query() << std::endl;
 	std::cout << "fragment  : " << uri.fragment() << std::endl;

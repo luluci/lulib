@@ -12,10 +12,13 @@ namespace lulib { namespace network { namespace uri_detail {
 		typedef char_traits::char_type char_type;
 		typedef char_traits::string_type string_type;
 
+		uri_parts() : port(0) {}
+
 		string_type scheme;
 		string_type user_info;
 		string_type host;
-		string_type port;
+		string_type port_str;
+		std::size_t port;
 		string_type file;
 		string_type query;
 		string_type fragment;

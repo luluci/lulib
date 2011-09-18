@@ -37,7 +37,8 @@ namespace lulib { namespace network {
 		string_type const& scheme()    const { return parts_.scheme;    }
 		string_type const& user_info() const { return parts_.user_info; }
 		string_type const& host()      const { return parts_.host;      }
-		string_type const& port()      const { return parts_.port;      }
+		std::size_t const& port()      const { return parts_.port;      }
+		string_type const& port_str()  const { return parts_.port_str;  }
 		string_type const& file()      const { return parts_.file;      }
 		string_type const& query()     const { return parts_.query;     }
 		string_type const& fragment()  const { return parts_.fragment;  }
