@@ -1,0 +1,6 @@
+hppp://192.168.0.1:8021/dir/index.html?q=test#anchor
+hppp://user:info@www.ex-ample.com:8021/dir/index.html?q=test#anchor
+http://[a:bb:ccc:dddd:eee:dd:f:1234]/dir/index.html
+urn:example:animal:ferret:nose
+foo://example.com:8042/over/there?name=ferret#nose
+invalid
