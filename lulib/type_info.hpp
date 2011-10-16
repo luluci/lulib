@@ -3,8 +3,10 @@
 #include <string>
 #include <typeinfo>
 
+#ifdef __GNUC__
 #include <cxxabi.h>
 #include <stdlib.h>
+#endif
 
 template<typename T>
 struct type {};
@@ -29,10 +31,14 @@ namespace lulib {
 
 	private:
 		void demangle(char const* demangle) {
+#ifdef __GNUC__
 			int status;
 			char * const p = abi::__cxa_demangle(demangle, 0, 0, &status);
 			demangle_ = p;
 			free(p);
+#else
+			demangle_ = demangle;
+#endif
 		}
 
 		std::type_info const& type_;

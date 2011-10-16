@@ -1,31 +1,5 @@
 #pragma once
 
-/*
-//
-Cygwin, g++4.5.1
-
-// sample code
-lulib::program_option::option args("オプション");
-args.enable("help", 0, "print help");  // 値を取らない。flagのみ
-args.enable< std::vector<std::string> >("input-file", 'i', "input file");
-args.enable< std::string >("output-file", 'o', "output file");
-args.enable< int >("size", 's', "size");
-args.nomodify("input-file");  // 修飾されていない引数は "input-file" とみなす
-args.parse(argc, argv);  // コマンドライン引数解析
-
-if (args.exist("help")) {
-	std::cout << "exist -h" << std::endl;
-	args.help();  // 受理するコマンドライン引数を一覧表示
-}
-if (args.exist('i')) {
-	std::vector<std::string> &vec = args["input-file"].as< str_vector >();  // 内部に持っているコンテナへの参照を取得
-}
-if (args.exist('o')) {
-	std::string& str = args["output-file"].as<std::string>();
-}
-
-*/
-
 #include <vector>
 #include <map>
 #include <string>

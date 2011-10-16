@@ -1,5 +1,7 @@
 #pragma once
 
+#include <lulib/utility/enable_if.hpp>
+
 namespace lulib {
 
 	template<typename T>
@@ -9,7 +11,5 @@ namespace lulib {
 
 	template < typename T >
 	T && value();
-
-	extern void * enabler;
 
 }// namespace lulib
