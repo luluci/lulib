@@ -23,17 +23,17 @@ int main() {
 	test<unsigned int>("uint: ", "FFFF");
 	test<unsigned int>("uint: ", "11101001001");
 	test<unsigned int>("uint: ", "02412");
-	test<lulib::hex>("hex: ", "1234");
-	test<lulib::hex>("hex: ", "FFFF");
-	test<lulib::hex>("hex: ", "FFFFFFFF");
-	test<lulib::hex>("hex: ", "FFFFFFFFFFFF");
-	test<lulib::hex64_t>("hex: ", "FFFFFFFFFFFF");
-	test<lulib::oct>("oct: ", "1234");
-	test<lulib::oct>("oct: ", "5671234567");
-	test<lulib::oct>("oct: ", "12348");
-	test<lulib::bin>("bin: ", "00001111");
-	test<lulib::bin>("bin: ", "11111111");
-	test<lulib::bin>("bin: ", "111111112");
+	test<lulib::as_hex>("hex: ", "1234");
+	test<lulib::as_hex>("hex: ", "FFFF");
+	test<lulib::as_hex>("hex: ", "FFFFFFFF");
+	test<lulib::as_hex>("hex: ", "FFFFFFFFFFFF");
+	test<lulib::as_hex64>("hex: ", "FFFFFFFFFFFF");
+	test<lulib::as_oct>("oct: ", "1234");
+	test<lulib::as_oct>("oct: ", "5671234567");
+	test<lulib::as_oct>("oct: ", "12348");
+	test<lulib::as_bin>("bin: ", "00001111");
+	test<lulib::as_bin>("bin: ", "11111111");
+	test<lulib::as_bin>("bin: ", "111111112");
 	test<short>("short: ", "0.111111111111111111111");
 	test<double>("double: ", "0.111111111111111111111");
 }
