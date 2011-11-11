@@ -114,12 +114,24 @@ namespace lulib {
 	typedef lexical_cast_detail::int_parser<8, std::uint32_t, 1, -1> as_oct32;
 	typedef lexical_cast_detail::int_parser<8, std::uint64_t, 1, -1> as_oct64;
 	typedef as_oct32 as_oct;
+	// 8進数 optional
+	typedef lexical_cast_detail::int_parser<8, boost::optional< std::uint8_t>, 1, -1> as_oct8_opt;
+	typedef lexical_cast_detail::int_parser<8, boost::optional<std::uint16_t>, 1, -1> as_oct16_opt;
+	typedef lexical_cast_detail::int_parser<8, boost::optional<std::uint32_t>, 1, -1> as_oct32_opt;
+	typedef lexical_cast_detail::int_parser<8, boost::optional<std::uint64_t>, 1, -1> as_oct64_opt;
+	typedef as_oct32_opt as_oct_opt;
 	// 2進数
 	typedef lexical_cast_detail::int_parser<2,  std::uint8_t, 1, -1> as_bin8;
 	typedef lexical_cast_detail::int_parser<2, std::uint16_t, 1, -1> as_bin16;
 	typedef lexical_cast_detail::int_parser<2, std::uint32_t, 1, -1> as_bin32;
 	typedef lexical_cast_detail::int_parser<2, std::uint64_t, 1, -1> as_bin64;
 	typedef as_bin32 as_bin;
+	// 2進数 optional
+	typedef lexical_cast_detail::int_parser<2, boost::optional< std::uint8_t>, 1, -1> as_bin8_opt;
+	typedef lexical_cast_detail::int_parser<2, boost::optional<std::uint16_t>, 1, -1> as_bin16_opt;
+	typedef lexical_cast_detail::int_parser<2, boost::optional<std::uint32_t>, 1, -1> as_bin32_opt;
+	typedef lexical_cast_detail::int_parser<2, boost::optional<std::uint64_t>, 1, -1> as_bin64_opt;
+	typedef as_bin32_opt as_bin_opt;
 
 	// 10進数
 	// 整数
@@ -136,6 +148,21 @@ namespace lulib {
 	// 実数
 	typedef lexical_cast_detail::real_parser<float>  as_float;
 	typedef lexical_cast_detail::real_parser<double> as_double;
+	// 10進数 optional
+	// 整数
+	typedef lexical_cast_detail::int_parser<10, boost::optional<  std::int8_t>, 1, -1>   as_int8_opt;
+	typedef lexical_cast_detail::int_parser<10, boost::optional< std::uint8_t>, 1, -1>  as_uint8_opt;
+	typedef lexical_cast_detail::int_parser<10, boost::optional< std::int16_t>, 1, -1>  as_int16_opt;
+	typedef lexical_cast_detail::int_parser<10, boost::optional<std::uint16_t>, 1, -1> as_uint16_opt;
+	typedef lexical_cast_detail::int_parser<10, boost::optional< std::int32_t>, 1, -1>  as_int32_opt;
+	typedef lexical_cast_detail::int_parser<10, boost::optional<std::uint32_t>, 1, -1> as_uint32_opt;
+	typedef lexical_cast_detail::int_parser<10, boost::optional< std::int64_t>, 1, -1>  as_int64_opt;
+	typedef lexical_cast_detail::int_parser<10, boost::optional<std::uint64_t>, 1, -1> as_uint64_opt;
+	typedef as_uint32_opt as_uint_opt;
+	typedef as_int32_opt   as_int_opt;
+	// 実数
+	typedef lexical_cast_detail::real_parser< boost::optional<float>  >  as_float_opt;
+	typedef lexical_cast_detail::real_parser< boost::optional<double> > as_double_opt;
 
 }// namespace lulib
 
