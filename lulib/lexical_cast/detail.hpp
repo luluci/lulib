@@ -17,6 +17,7 @@
 */
 
 #include <lulib/type_traits/is_nesting_type.hpp>
+#include <lulib/type_traits/enable_condition.hpp>
 
 #include <lulib/lexical_cast/qi_rule.hpp>
 #include <lulib/lexical_cast/exception.hpp>
@@ -54,37 +55,47 @@ namespace lulib {
 			typedef As type;
 		};
 
+		// rule enable_if
+		typedef lulib::enable_condition<
+			std::is_integral<lulib::_1>,
+			std::is_floating_point<lulib::_1>,
+			is_int_parser<lulib::_1>,
+			is_real_parser<lulib::_1>,
+			is_nesting_value_type<lulib::_1>
+		> rule_enable;
 		// Targetに対応したruleを作成
 		template<typename As, typename Enabler = void> struct rule;
 		// 整数型
 		template<typename As>
-		struct rule<As, typename std::enable_if< std::is_integral<As>::value >::type> {
+		struct rule<As, typename rule_enable::if_<0, As>::type> {
 			typedef typename int_parser<10, As>::type type;
 		};
 		// 浮動小数点型
 		template<typename As>
-		struct rule<As, typename std::enable_if< std::is_floating_point<As>::value >::type> {
+		struct rule<As, typename rule_enable::else_if_<1, As>::type> {
 			typedef typename real_parser<As>::type type;
 		};
 		// int_parser
 		template<typename As>
-		struct rule<As, typename std::enable_if< is_int_parser<As>::value >::type> {
+		struct rule<As, typename rule_enable::else_if_<2, As>::type> {
 			typedef typename As::type type;
 		};
 		// real_parser
 		template<typename As>
-		struct rule<As, typename std::enable_if< is_real_parser<As>::value >::type> {
+		struct rule<As, typename rule_enable::else_if_<3, As>::type> {
 			typedef typename As::type type;
 		};
 		// value_type
 		template<typename As>
-		struct rule<As, typename std::enable_if<
-			is_nesting_value_type<As>::value
-			&& !is_int_parser<As>::value
-			&& !is_real_parser<As>::value
-		>::type> {
+		struct rule<As, typename rule_enable::else_if_<4, As>::type> {
 			typedef typename rule<typename As::value_type>::type type;
 		};
+		// other type
+		template<typename As>
+		struct rule<As, typename rule_enable::else_<As>::type> {
+			typedef typename int_parser<10, As>::type type;
+		};
+
 
 		// qi grammar
 		// 数値解析パーザ

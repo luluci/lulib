@@ -32,37 +32,38 @@ namespace lulib {
 		// int parser wrapper
 		// signed/unsigned 両方受け付ける
 		template<
-			std::size_t Radix,                // 何進数か
-			typename Result = std::size_t,   // サイズ
-			std::size_t MinDigits = 1,        // 最低何字の数字を取るか
-			int MaxDigits = -1,               // 最大何字まで数字を取るか
+			std::size_t Radix,                              // 何進数か
+			typename Result = std::size_t,                  // 返り値型
+			std::size_t MinDigits = 1,                      // 最低何字の数字を取るか
+			int MaxDigits = -1,                             // 最大何字まで数字を取るか
+			typename Value = typename value<Result>::type,  // 数値型
 			typename Enable = void
 		> struct int_parser;
 		// signed specialize
-		template<std::size_t Radix, typename Result, std::size_t Min, int Max>
+		template<std::size_t Radix, typename Result, std::size_t Min, int Max, typename Value>
 		struct int_parser<
-			Radix, Result, Min, Max,
-			typename std::enable_if<std::is_signed<Result>::value>::type
+			Radix, Result, Min, Max, Value,
+			typename std::enable_if<std::is_signed<Value>::value>::type
 		> {
-			typedef Result                                      result_type;  // 返り値型
-			typedef typename value<Result>::type                 value_type;  // 数値型
-			typedef qi::int_parser<value_type, Radix, Min, Max>        type;  // qi rule型
+			typedef Result  result_type;  // 返り値型
+			typedef Value   value_type;   // 数値型
+			typedef qi::int_parser<value_type, Radix, Min, Max> type;  // qi rule型
 		};
 		// unsigned specialize
-		template<std::size_t Radix, typename Result, std::size_t Min, int Max>
+		template<std::size_t Radix, typename Result, std::size_t Min, int Max, typename Value>
 		struct int_parser<
-			Radix, Result, Min, Max,
-			typename std::enable_if<std::is_unsigned<Result>::value>::type
+			Radix, Result, Min, Max, Value,
+			typename std::enable_if<std::is_unsigned<Value>::value>::type
 		> {
-			typedef Result                                       result_type;  // 返り値型
-			typedef typename value<Result>::type                  value_type;  // 数値型
-			typedef qi::uint_parser<value_type, Radix, Min, Max>        type;  // qi rule型
+			typedef Result  result_type;  // 返り値型
+			typedef Value   value_type;   // 数値型
+			typedef qi::uint_parser<value_type, Radix, Min, Max> type;  // qi rule型
 		};
 		// int_parser検出用メタクラス
 		template<typename T>
 		class is_int_parser {
-			template<std::size_t R, typename N, std::size_t Mi, int Ma>
-			static std::true_type test(int_parser<R,N,Mi,Ma> &&);
+			template<std::size_t R, typename N, std::size_t Mi, int Ma, typename V>
+			static std::true_type test(int_parser<R,N,Mi,Ma,V> &&);
 			static std::false_type test(...);
 		public:
 			//static const bool value = decltype( test(T()) )::value;
@@ -71,19 +72,20 @@ namespace lulib {
 
 		// real parser wrapper
 		template<
-			typename Result,
-			typename Policy = qi::real_policies< typename value<Result>::type >
+			typename Result,                                // 返り値型
+			typename Value = typename value<Result>::type,  // 数値型
+			typename Policy = qi::real_policies<Value>
 		>
 		struct real_parser {
-			typedef Result                              result_type;  // 返り値型
-			typedef typename value<Result>::type         value_type;  // 数値型
-			typedef qi::real_parser<value_type, Policy>        type;  // qi rule型
+			typedef Result  result_type;  // 返り値型
+			typedef Value   value_type;   // 数値型
+			typedef qi::real_parser<value_type, Policy> type;  // qi rule型
 		};
 		// real_parser検出用メタクラス
 		template<typename T>
 		class is_real_parser {
-			template<typename N, typename P>
-			static std::true_type test(real_parser<N,P> &&);
+			template<typename N, typename V, typename P>
+			static std::true_type test(real_parser<N,V,P> &&);
 			static std::false_type test(...);
 		public:
 			//static const bool value = decltype( test(T()) )::value;
@@ -100,6 +102,12 @@ namespace lulib {
 	typedef lexical_cast_detail::int_parser<16, std::uint32_t, 1, -1> as_hex32;
 	typedef lexical_cast_detail::int_parser<16, std::uint64_t, 1, -1> as_hex64;
 	typedef as_hex32 as_hex;
+	// 16進 optional
+	typedef lexical_cast_detail::int_parser<16, boost::optional< std::uint8_t>, 1, -1> as_hex8_opt;
+	typedef lexical_cast_detail::int_parser<16, boost::optional<std::uint16_t>, 1, -1> as_hex16_opt;
+	typedef lexical_cast_detail::int_parser<16, boost::optional<std::uint32_t>, 1, -1> as_hex32_opt;
+	typedef lexical_cast_detail::int_parser<16, boost::optional<std::uint64_t>, 1, -1> as_hex64_opt;
+	typedef as_hex32_opt as_hex_opt;
 	// 8進数
 	typedef lexical_cast_detail::int_parser<8,  std::uint8_t, 1, -1> as_oct8;
 	typedef lexical_cast_detail::int_parser<8, std::uint16_t, 1, -1> as_oct16;
@@ -114,6 +122,7 @@ namespace lulib {
 	typedef as_bin32 as_bin;
 
 	// 10進数
+	// 整数
 	typedef lexical_cast_detail::int_parser<10,   std::int8_t, 1, -1>   as_int8;
 	typedef lexical_cast_detail::int_parser<10,  std::uint8_t, 1, -1>  as_uint8;
 	typedef lexical_cast_detail::int_parser<10,  std::int16_t, 1, -1>  as_int16;
@@ -124,6 +133,9 @@ namespace lulib {
 	typedef lexical_cast_detail::int_parser<10, std::uint64_t, 1, -1> as_uint64;
 	typedef as_uint32 as_uint;
 	typedef as_int32   as_int;
+	// 実数
+	typedef lexical_cast_detail::real_parser<float>  as_float;
+	typedef lexical_cast_detail::real_parser<double> as_double;
 
 }// namespace lulib
 

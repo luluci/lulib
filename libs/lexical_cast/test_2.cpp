@@ -25,6 +25,7 @@ void test_opt(V1 (&prefix)[N1], V2 (&str)[N2]) {
 			<< " (" << lulib::type_info<decltype( lulib::lexical_cast<T>(str) )>().name() << ")" << std::endl;
 	}
 	else {
+		std::cout << "lexical_cast failed: " << std::endl;
 	}
 }
 
@@ -49,8 +50,24 @@ int main() {
 	test_excep<lulib::as_bin>("bin: ", "11111111");
 	test_excep<lulib::as_bin>("bin: ", "111111112");
 	test_excep<short>("short: ", "0.111111111111111111111");
+	test_excep<float>("double: ", "0.111111111111111111111");
 	test_excep<double>("double: ", "0.111111111111111111111");
+	test_excep<lulib::as_float>("double: ", "0.111111111111111111111");
+	test_excep<lulib::as_double>("double: ", "0.111111111111111111111");
 
 	test_opt< boost::optional<int> >("int: ", "12345");
+	test_opt< boost::optional<int> >("int: ", "-67890");
+	test_opt< boost::optional<int> >("int: ", "FFFF");
+	test_opt< boost::optional<unsigned int> >("uint: ", "12345");
+	test_opt< boost::optional<unsigned int> >("uint: ", "-67890");
+	test_opt< boost::optional<unsigned int> >("uint: ", "FFFF");
+	test_opt< boost::optional<unsigned int> >("uint: ", "11101001001");
+	test_opt< boost::optional<unsigned int> >("uint: ", "02412");
+	test_opt<lulib::as_hex_opt>("hex: ", "1234");
+	test_opt<lulib::as_hex_opt>("hex: ", "FFFF");
+	test_opt<lulib::as_hex_opt>("hex: ", "FFFFFFFF");
+	test_opt<lulib::as_hex_opt>("hex: ", "FFFFFFFFFFFF");
+	test_opt<lulib::as_hex64_opt>("hex: ", "FFFFFFFFFFFF");
+
 }
 
