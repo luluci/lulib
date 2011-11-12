@@ -21,11 +21,13 @@
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/preprocessor/selection/max.hpp>
 
-// enable_condition‚ªó‚¯æ‚écondition‚ÌãŒÀ”
+#include <boost/static_assert.hpp>
+
+// enable_conditionãŒå—ã‘å–ã‚‹conditionã®ä¸Šé™æ•°
 #ifndef LULIB_ENABLE_CONDITION_MAX_CONDITION_SIZE
 #	define LULIB_ENABLE_CONDITION_MAX_CONDITION_SIZE 10
 #endif
-// condition‚Éó‚¯æ‚éƒeƒ“ƒvƒŒ[ƒgˆø”‚ÌãŒÀ”
+// conditionã«å—ã‘å–ã‚‹ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆå¼•æ•°ã®ä¸Šé™æ•°
 #ifndef LULIB_ENABLE_CONDITION_MAX_PARAM_SIZE
 #	define LULIB_ENABLE_CONDITION_MAX_PARAM_SIZE 10
 #endif
@@ -50,11 +52,11 @@ namespace lulib {
 	namespace enable_condition_detail {
 		namespace mpl = boost::mpl;
 
-		// sequence‚©‚çsize‚ğæ“¾
+		// sequenceã‹ã‚‰sizeã‚’å–å¾—
 		template<typename Seq>
 		struct size : public mpl::size<Seq>::type {};
 
-		// Pos‚ªğŒ”ˆÈã‚Ì’l‚É‚È‚Á‚Ä‚¢‚È‚¢‚©
+		// PosãŒæ¡ä»¶æ•°ä»¥ä¸Šã®å€¤ã«ãªã£ã¦ã„ãªã„ã‹
 		template<typename Seq, typename size<Seq>::value_type Pos>
 		struct check_range {
 			static_assert(
@@ -62,7 +64,7 @@ namespace lulib {
 				"detect out of range"
 			);
 		};
-		// condition sequence‚©‚çPos”Ô–Ú‚Ìcondition‚ğæ‚èo‚·
+		// condition sequenceã‹ã‚‰Posç•ªç›®ã®conditionã‚’å–ã‚Šå‡ºã™
 		template<typename CondSeq, typename size<CondSeq>::value_type Pos>
 		struct get_cond : mpl::at_c<CondSeq, Pos> {
 			static_assert(
@@ -71,52 +73,52 @@ namespace lulib {
 			);
 		};
 
-		// ƒeƒ“ƒvƒŒ[ƒgˆø”‚©‚çmpl::na‚ğíœ‚µ‚½ã‚Åsequence(mpl::vector)‚ğì¬‚·‚é
+		// ãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆå¼•æ•°ã‹ã‚‰mpl::naã‚’å‰Šé™¤ã—ãŸä¸Šã§sequence(mpl::vector)ã‚’ä½œæˆã™ã‚‹
 		template<LULIB_ENABLE_CONDITION_PARAMS>
 		struct make_sequence : public mpl::remove< mpl::vector<LULIB_ENABLE_CONDITION_ARGS>, mpl::na> {};
-		// Lambda®‚Ésequence‚ğapply‚·‚é
+		// Lambdaå¼ã«sequenceã‚’applyã™ã‚‹
 		template<typename Cond, typename ParamSeq>
 		struct apply_seq : public mpl::apply< mpl::unpack_args<Cond>, ParamSeq >::type {};
-		// Lambda®‚Ésequence‚ğapply‚µA‚»‚ÌŒ‹‰Ê‚ğ”½“]‚·‚é
+		// Lambdaå¼ã«sequenceã‚’applyã—ã€ãã®çµæœã‚’åè»¢ã™ã‚‹
 		template<typename Cond, typename ParamSeq>
 		struct apply_seq_inv : public mpl::not_< mpl::apply< mpl::unpack_args<Cond>, ParamSeq > >::type {};
 
-		// CondSeq‚ÌPos”Ô–Ú‚Ìcondition‚ÉParamSeq‚ğ“K—p‚µ‚½Œ‹‰Ê‚ğ•Ô‚·
+		// CondSeqã®Posç•ªç›®ã®conditionã«ParamSeqã‚’é©ç”¨ã—ãŸçµæœã‚’è¿”ã™
 		template<typename CondSeq, typename size<CondSeq>::value_type Pos, typename ParamSeq>
 		struct match : public apply_seq< typename get_cond<CondSeq, Pos>::type, ParamSeq > {};
-		// CondSeq‚ÌŠecondition‚ÉParamSeq‚ğapply‚µ‚½‚Æ‚«A
-		// Pos”Ô–Ú‚Ìcondition‚Å‰‚ß‚Ätrue‚Æ‚È‚é‚©‚Ç‚¤‚©
+		// CondSeqã®å„conditionã«ParamSeqã‚’applyã—ãŸã¨ãã€
+		// Posç•ªç›®ã®conditionã§åˆã‚ã¦trueã¨ãªã‚‹ã‹ã©ã†ã‹
 		template<typename CondSeq, typename size<CondSeq>::value_type Pos, typename ParamSeq>
 		struct match_first : public mpl::bool_<
 			mpl::find_if< CondSeq, apply_seq<mpl::_1, ParamSeq> >::type::pos::value == Pos
 		> {};
-		// CondSeq‚ÌŠecondition‚ÉParamSeq‚ğapply‚µ‚½‚Æ‚«A
-		// Pos”Ô–Ú‚Ìcondition‚Å‰‚ß‚Äfalse‚Æ‚È‚é‚©‚Ç‚¤‚©
+		// CondSeqã®å„conditionã«ParamSeqã‚’applyã—ãŸã¨ãã€
+		// Posç•ªç›®ã®conditionã§åˆã‚ã¦falseã¨ãªã‚‹ã‹ã©ã†ã‹
 		template<typename CondSeq, typename size<CondSeq>::value_type Pos, typename ParamSeq>
 		struct not_match_first : public mpl::bool_<
 			mpl::find_if< CondSeq, apply_seq_inv<mpl::_1, ParamSeq> >::type::pos::value == Pos
 		> {};
-		// condition sequence‚É‘Î‚µ‚ÄParamSeq‚ğapply‚µ‚½‚Æ‚«‚É
-		// true‚Æ‚È‚écondition‚Ì”‚ğƒJƒEƒ“ƒg‚·‚é
+		// condition sequenceã«å¯¾ã—ã¦ParamSeqã‚’applyã—ãŸã¨ãã«
+		// trueã¨ãªã‚‹conditionã®æ•°ã‚’ã‚«ã‚¦ãƒ³ãƒˆã™ã‚‹
 		template<typename CondSeq, typename ParamSeq>
 		struct match_count : public mpl::count_if< CondSeq, apply_seq<mpl::_1, ParamSeq> >::type {};
-		// condition sequence‚É‘Î‚µ‚ÄParamSeq‚ğapply‚µ‚½‚Æ‚«‚É
-		// false‚Æ‚È‚écondition‚Ì”‚ğƒJƒEƒ“ƒg‚·‚é
+		// condition sequenceã«å¯¾ã—ã¦ParamSeqã‚’applyã—ãŸã¨ãã«
+		// falseã¨ãªã‚‹conditionã®æ•°ã‚’ã‚«ã‚¦ãƒ³ãƒˆã™ã‚‹
 		template<typename CondSeq, typename ParamSeq>
 		struct not_match_count : public mpl::count_if< CondSeq, apply_seq_inv<mpl::_1, ParamSeq> >::type {};
 
-		// d•¡‚·‚éğŒ‚ª‚ ‚é‚©
+		// é‡è¤‡ã™ã‚‹æ¡ä»¶ãŒã‚ã‚‹ã‹
 		template<typename Seq, typename ParamSeq>
 		struct check_duplication {
 			static_assert(
-				match_count<Seq,ParamSeq>::value < 2,
+				2 > match_count<Seq,ParamSeq>::value,
 				"detect conflicting condition"
 			);
 		};
 		template<typename Seq, typename ParamSeq>
 		struct check_duplication_inv {
 			static_assert(
-				not_match_count<Seq,ParamSeq>::value < 2,
+				2 > not_match_count<Seq,ParamSeq>::value,
 				"detect conflicting condition"
 			);
 		};
@@ -158,37 +160,37 @@ namespace lulib {
 			static const size_type size = size<Seq>::value;
 
 		public:
-			// if: Pos”Ô–Ú‚Ìcondition‚É‘Î‚µ‚ÄT‚ğapply‚µ‚½Œ‹‰Ê‚ªtrue
-			//         ‚Ì‚Æ‚«—LŒø
-			//     (‚»‚Ì‘¼‚Ìcondition‚Æ‚Í“Æ—§‚µ‚Ä‚¢‚é)
-			//     (Pos”Ô–Ú‚Ìcondition‚É‘Î‚µ‚Äenable_if‚Æ“¯“™‚Ì“®ì‚ğ‚·‚é)
+			// if: Posç•ªç›®ã®conditionã«å¯¾ã—ã¦Tã‚’applyã—ãŸçµæœãŒtrue
+			//         ã®ã¨ãæœ‰åŠ¹
+			//     (ãã®ä»–ã®conditionã¨ã¯ç‹¬ç«‹ã—ã¦ã„ã‚‹)
+			//     (Posç•ªç›®ã®conditionã«å¯¾ã—ã¦enable_ifã¨åŒç­‰ã®å‹•ä½œã‚’ã™ã‚‹)
 			template<size_type Pos, LULIB_ENABLE_CONDITION_PARAMS>
 			struct if_ : public Policy::template if_<
 				Seq, Pos, typename make_sequence< LULIB_ENABLE_CONDITION_ARGS >::type
 			> {};
-			// else if: 0~Pos-1”Ô–Ú‚Ü‚Å‚Ìcondition‚ÉT‚ğapply‚µ‚½Œ‹‰Ê‚ªfalse
-			//          ‚©‚Â Pos”Ô–Ú‚Ìcondition‚É‘Î‚µ‚ÄT‚ğapply‚µ‚½Œ‹‰Ê‚ªtrue
-			//              ‚Ì‚Æ‚«—LŒø
+			// else if: 0~Pos-1ç•ªç›®ã¾ã§ã®conditionã«Tã‚’applyã—ãŸçµæœãŒfalse
+			//          ã‹ã¤ Posç•ªç›®ã®conditionã«å¯¾ã—ã¦Tã‚’applyã—ãŸçµæœãŒtrue
+			//              ã®ã¨ãæœ‰åŠ¹
 			template<size_type Pos, LULIB_ENABLE_CONDITION_PARAMS>
 			struct else_if_ : public Policy::template else_if_<
 				Seq, Pos, typename make_sequence< LULIB_ENABLE_CONDITION_ARGS >::type
 			> {};
-			// else: Šecondition sequence‚Ìcondition‚ÉT‚ğapply‚µ‚½Œ‹‰Ê‚ª‚·‚×‚Äfalse
-			//         ‚Ì‚Æ‚«—LŒø
+			// else: å„condition sequenceã®conditionã«Tã‚’applyã—ãŸçµæœãŒã™ã¹ã¦false
+			//         ã®ã¨ãæœ‰åŠ¹
 			template<LULIB_ENABLE_CONDITION_PARAMS>
 			struct else_ : public Policy::template else_<
 				Seq, typename make_sequence< LULIB_ENABLE_CONDITION_ARGS >::type
 			> {};
-			// case: Pos”Ô–Ú‚Ìcondition‚É‘Î‚µ‚ÄT‚ğapply‚µ‚½Œ‹‰Ê‚ªtrue
-			//           ‚Ì‚Æ‚«—LŒø
-			//       ‚½‚¾‚µAcondition sequence‚É‘Î‚µ‚ÄT‚ğapply‚µ‚½‚Æ‚«‚É
-			//       2‚ÂˆÈã‚Ìcondition‚ªtrue‚Æ‚È‚Á‚½‚çstatic_assert‚ğ
+			// case: Posç•ªç›®ã®conditionã«å¯¾ã—ã¦Tã‚’applyã—ãŸçµæœãŒtrue
+			//           ã®ã¨ãæœ‰åŠ¹
+			//       ãŸã ã—ã€condition sequenceã«å¯¾ã—ã¦Tã‚’applyã—ãŸã¨ãã«
+			//       2ã¤ä»¥ä¸Šã®conditionãŒtrueã¨ãªã£ãŸã‚‰static_assertã‚’
 			template<size_type Pos, LULIB_ENABLE_CONDITION_PARAMS>
 			struct case_ : public Policy::template case_<
 				Seq, Pos, typename make_sequence< LULIB_ENABLE_CONDITION_ARGS >::type
 			> {};
-			// default_: condition sequence‚Ì‚·‚×‚Ä‚Ìƒ}ƒbƒ`‚µ‚È‚¢
-			//           else_‚Æ“¯“™
+			// default_: condition sequenceã®ã™ã¹ã¦ã®ãƒãƒƒãƒã—ãªã„
+			//           else_ã¨åŒç­‰
 			template<LULIB_ENABLE_CONDITION_PARAMS>
 			struct default_ : public Policy::template else_<
 				Seq, typename make_sequence< LULIB_ENABLE_CONDITION_ARGS >::type

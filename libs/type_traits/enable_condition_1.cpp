@@ -1,3 +1,5 @@
+#pragma warning(disable : 4819)
+
 #include <iostream>
 #include <type_traits>
 #include <lulib/type_traits/enable_condition.hpp>
