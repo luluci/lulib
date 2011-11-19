@@ -21,8 +21,6 @@
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/preprocessor/selection/max.hpp>
 
-#include <boost/static_assert.hpp>
-
 // enable_conditionが受け取るconditionの上限数
 #ifndef LULIB_ENABLE_CONDITION_MAX_CONDITION_SIZE
 #	define LULIB_ENABLE_CONDITION_MAX_CONDITION_SIZE 10
