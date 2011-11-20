@@ -20,7 +20,7 @@ namespace lulib { namespace network { namespace http { namespace method {
 		template<typename Request, typename Buffer>
 		static void make_request(Request const& request, Buffer &buffer) {
 			std::ostream req(&buffer);
-			req << "GET " << request.file;
+			req << "GET " << request.file();
 			// クエリがあるなら追記
 			if (!request.queries.empty()) {
 				auto it = request.queries.begin(), end = request.queries.end();
@@ -32,9 +32,9 @@ namespace lulib { namespace network { namespace http { namespace method {
 				}
 			}
 
-			req << " HTTP/" << request.major_ver_ << "." << request.minor_ver_ << "\r\n";
+			req << " HTTP/" << request.major_ver() << "." << request.minor_ver() << "\r\n";
 			// Hostヘッダ
-			req << "Host: " << request.host << ":" << request.port << "\r\n";
+			req << "Host: " << request.host() << ":" << request.port() << "\r\n";
 			// その他ヘッダを設定
 			auto it = request.headers.begin(), end = request.headers.end();
 			while (it != end) {

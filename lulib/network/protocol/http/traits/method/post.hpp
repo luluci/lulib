@@ -7,10 +7,10 @@
 
 namespace lulib { namespace network { namespace http { namespace method {
 
-	template<std::size_t MajorVer, std::size_t MinorVer, typename Char> struct POST;
+	template<typename Char> struct POST;
 
-	template<std::size_t MajorVer, std::size_t MinorVer>
-	struct POST<MajorVer,MinorVer,char> {
+	template<>
+	struct POST<char> {
 		// CharTraits
 		typedef lulib::char_traits<char> char_traits;
 		typedef typename char_traits::char_type char_type;
@@ -20,9 +20,10 @@ namespace lulib { namespace network { namespace http { namespace method {
 		template<typename Request, typename Buffer>
 		static void make_request(Request const& request, Buffer &buffer) {
 			std::ostream req(&buffer);
-			req << "POST " << request.file << " HTTP/" << MajorVer << "." << MinorVer << "\r\n";
+			req << "POST " << request.file()
+				<< " HTTP/" << request.major_ver() << "." << request.minor_ver() << "\r\n";
 			// Hostヘッダ
-			req << "Host: " << request.host << ":" << request.port << "\r\n";
+			req << "Host: " << request.host() << ":" << request.port() << "\r\n";
 			// その他ヘッダを設定
 			auto it = request.headers.begin(), end = request.headers.end();
 			while (it != end) {

@@ -203,14 +203,8 @@ namespace lulib { namespace network { namespace http {
 
 	public:
 		// interface to connect & request write
-		// GET alias
-		self_type& operator<<(request_detail::request_wrapper<request_detail::GET,Char> const& req) {
-			return get(req.request);
-		}
-		// GETリクエストを送る
-		self_type& get(request const& req) {
-			// メソッド：HTTP/1.1
-			connect_write_impl< method::GET<Char> >(req);
+		self_type& operator<<(request &req) {
+			connect_write_impl(req);
 			return *this;
 		}
 
@@ -222,24 +216,24 @@ namespace lulib { namespace network { namespace http {
 	private:
 		// friend function
 		// connect
-		template<typename C, typename S, typename H, typename Sc>
-		friend void network::detail::connect(C&,S&,H&&,Sc&&);
-		template<typename E, typename C, typename S>
-		friend void network::detail::resolve_handle(error_code const&,E,C&,S&);
-		template<typename E, typename C, typename S>
-		friend void network::detail::connect_handle(error_code const&,E,C&,S&);
+		template<typename C, typename S, typename R>
+		friend void network::detail::connect(C&,S&,R&);
+		template<typename E, typename C, typename S, typename R>
+		friend void network::detail::resolve_handle(error_code const&,E,C&,S&,R&);
+		template<typename E, typename C, typename S, typename R>
+		friend void network::detail::connect_handle(error_code const&,E,C&,S&,R&);
 		// connect_ssl
-		template<typename C, typename S, typename H, typename Sc>
-		friend void network::detail::connect_ssl(C&,S&,H&&,Sc&&);
-		template<typename E, typename C, typename S>
-		friend void network::detail::resolve_ssl_handle(error_code const&,E,C&,S&);
-		template<typename E, typename C, typename S>
-		friend void network::detail::connect_ssl_handle(error_code const&,E,C&,S&);
-		template<typename C, typename S>
-		friend void network::detail::connect_ssl_handshake(error_code const&,C&,S&);
+		template<typename C, typename S, typename R>
+		friend void network::detail::connect_ssl(C&,S&,R&);
+		template<typename E, typename C, typename S, typename R>
+		friend void network::detail::resolve_ssl_handle(error_code const&,E,C&,S&,R&);
+		template<typename E, typename C, typename S, typename R>
+		friend void network::detail::connect_ssl_handle(error_code const&,E,C&,S&,R&);
+		template<typename C, typename S, typename R>
+		friend void network::detail::connect_ssl_handshake(error_code const&,C&,S&,R&);
 		// write
-		template<typename C, typename S, typename B>
-		friend void network::detail::write(C&,S&,B&);
+		template<typename C, typename S, typename R>
+		friend void network::detail::write(C&,S&,R&);
 		// read
 		template<typename C, typename S, typename R>
 		friend void network::detail::read(C&,S&,R&);
@@ -259,25 +253,17 @@ namespace lulib { namespace network { namespace http {
 		}
 
 		// 通信実行
-		template<typename Method>
-		void connect_write_impl(request const& req) {
-			scheme_id_ = req.scheme_id;
-
-			// バッファの初期化
-			request_buf_.consume( request_buf_.size() );
-			response_buf_.consume( response_buf_.size() );
+		void connect_write_impl(request &req) {
+			scheme_id_ = req.scheme_id();
 
 			// ヘッダの調査
 			check_keepalive(req);  // Keep-Alive設定
 
-			// request作成
-			Method::make_request(req, request_buf_);
-
 			if (!is_keepalive(req)) {
-				connect_impl(req.host, req.scheme_name);
+				connect_impl(req);
 			}
 			else {
-				write_impl();
+				write_impl(req);
 			}
 
 			// io_service run();
@@ -285,14 +271,14 @@ namespace lulib { namespace network { namespace http {
 		}
 
 		// connect処理
-		void connect_impl(string_type const& host, string_type const& scheme) {
+		void connect_impl(request &req) {
 			switch (scheme_id_) {
 				case request::scheme::http: {
-					network::detail::connect(*this, socket_, host, scheme);
+					network::detail::connect(*this, socket_, req);
 					break;
 				}
 				case request::scheme::https: {
-					network::detail::connect_ssl(*this, ssl_socket_, host, scheme);
+					network::detail::connect_ssl(*this, ssl_socket_, req);
 					break;
 				}
 			}
@@ -301,17 +287,17 @@ namespace lulib { namespace network { namespace http {
 			set_deadline_timer();
 		}
 		// write処理
-		void write_impl() {
+		void write_impl(request &req) {
 			// async処理の登録
 			switch (scheme_id_) {
 				case request::scheme::http: {
 					// writeへ
-					network::detail::write(*this, socket_, request_buf_);
+					network::detail::write(*this, socket_, req);
 					break;
 				}
 				case request::scheme::https: {
 					// writeへ
-					network::detail::write(*this, ssl_socket_, request_buf_);
+					network::detail::write(*this, ssl_socket_, req);
 					break;
 				}
 			}
@@ -360,13 +346,15 @@ namespace lulib { namespace network { namespace http {
 
 	public:// VC用：lambda内でprivateメンバにアクセスできない
 		// connectに成功
-		void connect_success(error_code const& ec) {
+		template<typename Socket>
+		void connect_success(error_code const& ec, Socket &socket, request &req) {
 			DEBUG_OUTPUT("    connect_success: ");
 			timer_cancel();
-			write_impl();
+			write_impl(req);
 		}
 		// connectに失敗
-		void connect_failure(error_code const& ec) {
+		template<typename Socket>
+		void connect_failure(error_code const& ec, Socket &socket, request &req) {
 			DEBUG_OUTPUT("    connect_failure: ");
 			// 初期化
 			failure();
@@ -473,9 +461,9 @@ namespace lulib { namespace network { namespace http {
 		// Keep-Alive実行中チェック
 		//   Keep-Aliveで通信するかどうかを返す
 		bool is_keepalive(request const& req) {
-			bool is_same_host = (prev_host_ == req.host);
+			bool is_same_host = (prev_host_ == req.host());
 			// 直前に接続したhostを記憶
-			prev_host_ = req.host;
+			prev_host_ = req.host();
 
 			switch (scheme_id_) {
 				case request::scheme::http: {
