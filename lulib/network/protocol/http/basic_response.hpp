@@ -40,10 +40,19 @@ namespace lulib { namespace network { namespace http {
 			};
 		};
 
+		// Connectionステータス
+		struct connection {
+			enum enum_t {
+				close,       // close
+				keep_alive,  // Keep-Alive
+			};
+		};
+
 	public:
 		basic_response()
 		: buffer_(), version_(), status_code_(0), status_(), header_(), body_()
 		, content_length_(0), chunk_rest_(0), state_(state::header), is_chunked_(false)
+		, connection_(connection::close)
 		{
 			
 		}
@@ -63,6 +72,7 @@ namespace lulib { namespace network { namespace http {
 		basic_response(basic_client<T,C>& client)
 		: version_(), status_code_(0), status_(), header_(), body_()
 		, content_length_(0), chunk_rest_(0), state_(state::header), is_chunked_(false)
+		, connection_(connection::close)
 		{
 			client.read(*this);
 		}
@@ -72,7 +82,10 @@ namespace lulib { namespace network { namespace http {
 			return *this;
 		}
 
-
+		// response header
+		header_container const& header() {
+			return header_;
+		}
 		// response body
 		string_type const& body() {
 			return body_;
@@ -85,6 +98,10 @@ namespace lulib { namespace network { namespace http {
 		bool operator!() const {
 			return state_ != state::eof;
 		}
+
+		// Connection状態
+		bool is_close()     { return connection_ == connection::close; }       // Connection: close
+		bool is_keepalive() { return connection_ == connection::keep_alive; }  // Connection: keep-alive
 
 		void reset() {
 			version_.clear();
@@ -207,6 +224,9 @@ namespace lulib { namespace network { namespace http {
 				else content_length_ = lulib::lexical_cast<lulib::as_uint>(
 						header_["Content-Length"]
 				);
+				// Connection判定
+				if (header_["Connection"] == "keep-alive") connection_ = connection::keep_alive;
+				else connection_ = connection::close;
 
 				// body: Transfer-Encoding
 				state_ = is_chunked_ ? state::body_chunk : state::body;
@@ -289,10 +309,11 @@ namespace lulib { namespace network { namespace http {
 		string_type body_;         // response body
 
 		// other
-		std::size_t content_length_;       // bodyサイズ
-		std::size_t chunk_rest_;           // chunkデータ取得残りサイズ
-		typename state::enum_t state_;
-		bool is_chunked_;          // chunked判定
+		std::size_t content_length_;     // bodyサイズ
+		std::size_t chunk_rest_;         // chunkデータ取得残りサイズ
+		typename state::enum_t state_;            // response解析状態
+		bool is_chunked_;                // chunked判定
+		typename connection::enum_t connection_;  // Connection
 	};
 
 }}}//namespace lulib::network::http

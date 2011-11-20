@@ -6,7 +6,14 @@
 namespace http = lulib::network::http;
 
 void handler(http::client::response &resp) {
-	std::cerr << "response size:" << resp.body().size() << std::endl;
+	std::cerr << "response body size:" << resp.body().size() << std::endl;
+	auto it = resp.header().begin();
+	auto end = resp.header().end();
+	std::cout << "response header:" << std::endl;
+	while (it != end) {
+		std::cout << it->first << " : " << it->second << std::endl;
+		++it;
+	}
 	std::cout << "response body:" << std::endl;
 	std::cout << resp.body() << std::endl;
 }

@@ -366,8 +366,12 @@ namespace lulib { namespace network { namespace http {
 		}
 
 		// readに成功
-		void read_success(error_code const& ec) {
+		void read_success(error_code const& ec, response &resp) {
 			DEBUG_OUTPUT("    read_success.");
+			// "Connection: close" が返ってきたら
+			if (resp.is_close()) {
+				keep_alive_ = false;
+			}
 			// 通信終了処理(成功)
 			success();
 			// 
@@ -376,7 +380,7 @@ namespace lulib { namespace network { namespace http {
 			}
 		}
 		// readに失敗
-		void read_failure(error_code const& ec) {
+		void read_failure(error_code const& ec, response &resp) {
 			DEBUG_OUTPUT("    read_failure: ");
 			// 通信終了処理(失敗)
 			failure();

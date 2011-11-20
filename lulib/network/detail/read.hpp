@@ -34,7 +34,7 @@ namespace lulib { namespace network { namespace detail {
 		if (!ec) {
 			response.read_success();  // 読み込んだ文のbufferを渡す
 			if (response) {  // 読み込みが完了した
-				client.read_success(ec);
+				client.read_success(ec, response);
 				return;
 			}
 
@@ -53,10 +53,10 @@ namespace lulib { namespace network { namespace detail {
 		// が通知される
 		// 取得したところまで返すのでsuccess()して終了
 		else if (ec != boost::asio::error::eof) {
-			client.read_failure(ec);
+			client.read_failure(ec, response);
 		}
 		else {
-			client.read_success(ec);
+			client.read_success(ec, response);
 		}
 	}
 
