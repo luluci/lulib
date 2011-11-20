@@ -1,18 +1,16 @@
 #pragma once
 #pragma warning(disable : 4819)
 
-#include <string>
 #include <memory>
 #include <functional>
 
 #include <boost/thread.hpp>
 
-#include <boost/asio.hpp>
-#include <boost/asio/streambuf.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/date_time/posix_time/posix_time_duration.hpp>
 
 #include <lulib/type_traits/char_traits.hpp>
+#include <lulib/detail/debug_output.hpp>
 
 #include <lulib/network/scheme.hpp>
 #include <lulib/network/detail/connect.hpp>
@@ -21,11 +19,8 @@
 #include <lulib/network/detail/read.hpp>
 #include <lulib/network/protocol/http/basic_request.hpp>
 #include <lulib/network/protocol/http/basic_response.hpp>
-#include <lulib/network/protocol/http/traits/method.hpp>
 #include <lulib/network/traits/transport.hpp>
 #include <lulib/network/traits/ssl.hpp>
-
-#include <lulib/detail/debug_output.hpp>
 
 namespace lulib { namespace network { namespace http {
 
@@ -44,7 +39,6 @@ namespace lulib { namespace network { namespace http {
 		typedef io_service::work             work;            // work
 		typedef boost::asio::deadline_timer  deadline_timer;  // deadline_timer
 		typedef std::size_t                  timer_type;
-		typedef boost::asio::streambuf       buffer;
 		typedef boost::system::error_code    error_code;
 
 		typedef basic_scheme<Char> scheme;
@@ -66,13 +60,11 @@ namespace lulib { namespace network { namespace http {
 		// request
 		typedef basic_request<Char> request;
 		// response
-		//typedef basic_response<Char> response;
 		typedef basic_response<Char> response;
 
 		// マルチスレッドで通信する場合、
 		// コールバックファンクタを設定する
-		//typedef std::function<void(response&)> callback_functor;
-		typedef std::function<void(buffer&)> callback_functor;
+		typedef std::function<void(request&)> callback_functor;
 
 	public:
 		// io_serviceが渡されなかった場合、自分が作成
@@ -96,6 +88,85 @@ namespace lulib { namespace network { namespace http {
 		~basic_client() {
 			work_.reset();
 			if (thread_.joinable()) thread_.join();
+		}
+
+	public:
+		// io_serviceへの参照を返す
+		inline io_service& get_io_service() {
+			return ios_;
+		}
+
+		// TimeOut値の設定
+		inline void timeout(std::size_t time) {
+			timeout_ = time;
+		}
+
+		// request取得時にコールバック
+		template<typename Callback>
+		bool set_callback(Callback &&callback) {
+			// io_service::run()を別スレッドで行い、完全非同期化
+			// 通信の結果はコールバックファンクタからのみ返される
+			work_.reset( new work(ios_) );
+			if (!work_) return false;
+			thread_ = boost::thread( boost::bind(&io_service::run, &ios_) );
+			if (!thread_.joinable()) {
+				work_.reset();
+				return false;
+			}
+			// response handler
+			callback_ = std::forward<Callback>(callback);
+			if (!callback_) {
+				work_.reset();
+				thread_.join();
+				return false;
+			}
+			return true;
+		}
+		void reset_callback() {
+			// 非同期化を解除
+			// レスポンスはoperator=から行う
+			work_.reset();
+		}
+		bool is_async() {
+			return (work_ && callback_);
+		}
+
+		// このプロトコルが開いているかどうか
+		bool is_open() {
+			switch (scheme_id_) {
+				case request::scheme::http: {
+					return socket_.is_open();
+				}
+				case request::scheme::https: {
+					return ssl_socket_.lowest_layer().is_open();
+				}
+			}
+			return false;
+		}
+		inline operator bool() {
+			return is_open();
+		}
+
+	public:
+		// interface to connect & request write
+		self_type& operator<<(request &req) {
+			connect_write_impl(req);
+			return *this;
+		}
+
+		// responseを取得
+		void read(response &r) {
+			read_impl(r);
+		}
+
+		void set_deadline_timer() {
+			// deadlineをセット
+			deadline_.expires_from_now( boost::posix_time::seconds(timeout_) );
+			// deadline_timerを開始
+			deadline_.async_wait([&](error_code const& ec) {
+				// timeoutによる終了(false)のみresultに適用する
+				this->on_timeout(ec);
+			});
 		}
 
 	private:
@@ -133,84 +204,6 @@ namespace lulib { namespace network { namespace http {
 
 			if (ec) return;
 			socket_.close(ec);
-		}
-
-	public:
-		// io_serviceへの参照を返す
-		inline io_service& get_io_service() {
-			return ios_;
-		}
-
-		// TimeOut値の設定
-		inline void timeout(std::size_t time) {
-			timeout_ = time;
-		}
-
-		void set_deadline_timer() {
-			// deadlineをセット
-			deadline_.expires_from_now( boost::posix_time::seconds(timeout_) );
-			// deadline_timerを開始
-			deadline_.async_wait([&](error_code const& ec) {
-				// timeoutによる終了(false)のみresultに適用する
-				this->on_timeout(ec);
-			});
-		}
-
-		// request取得時にコールバック
-		template<typename Callback>
-		bool set_callback(Callback &&callback) {
-			// io_service::run()を別スレッドで行い、完全非同期化
-			// 通信の結果はコールバックファンクタからのみ返される
-			work_.reset( new work(ios_) );
-			if (!work_) return false;
-			thread_ = boost::thread( boost::bind(&io_service::run, &ios_) );
-			if (!thread_.joinable()) {
-				work_.reset();
-				return false;
-			}
-			// response handler
-			callback_ = std::forward<Callback>(callback);
-			if (!callback_) {
-				work_.reset();
-				thread_.join();
-				return false;
-			}
-		}
-		void reset_callback() {
-			// 非同期化を解除
-			// レスポンスはoperator=から行う
-			work_.reset();
-		}
-		bool is_async() {
-			return (work_ && callback_);
-		}
-
-		// このプロトコルが開いているかどうか
-		bool is_open() {
-			switch (scheme_id_) {
-				case request::scheme::http: {
-					return socket_.is_open();
-				}
-				case request::scheme::https: {
-					return ssl_socket_.lowest_layer().is_open();
-				}
-			}
-			return false;
-		}
-		inline operator bool() {
-			return is_open();
-		}
-
-	public:
-		// interface to connect & request write
-		self_type& operator<<(request &req) {
-			connect_write_impl(req);
-			return *this;
-		}
-
-		// responseを取得
-		void read(response &r) {
-			read_impl(r);
 		}
 
 	private:
@@ -379,7 +372,7 @@ namespace lulib { namespace network { namespace http {
 			success();
 			// 
 			if (work_ && callback_) {
-				callback_(response_buf_);
+				//callback_(response_buf_);
 			}
 		}
 		// readに失敗
@@ -436,7 +429,7 @@ namespace lulib { namespace network { namespace http {
 			return ec;
 		}
 
-
+/*
 		void print_buffer(buffer &buf) {
 			std::istream ist(&buf);
 			std::string str;
@@ -444,6 +437,7 @@ namespace lulib { namespace network { namespace http {
 				std::cout << str << std::endl;
 			}
 		}
+*/
 
 	private:
 		// Keep-Alive チェック
@@ -505,9 +499,6 @@ namespace lulib { namespace network { namespace http {
 		socket_type                 socket_;		// http socket
 		context                     context_;		// SSL context
 		ssl_socket_type             ssl_socket_;	// https socket
-		buffer                      request_buf_;       // Request Buffer
-		buffer                      response_buf_;      // Response Buffer
-		response                    response_;		// Response Container
 		timer_type                  timeout_;		// timeoutまでの時間
 		deadline_timer              deadline_;          // deadline timer
 		boost::thread               thread_;		// マルチスレッド時に使う

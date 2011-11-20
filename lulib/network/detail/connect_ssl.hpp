@@ -2,6 +2,7 @@
 #pragma warning(disable : 4819)
 
 #include <boost/asio/ssl/stream_base.hpp>
+#include <boost/asio/connect.hpp>
 
 #include <lulib/network/detail/error_code.hpp>
 

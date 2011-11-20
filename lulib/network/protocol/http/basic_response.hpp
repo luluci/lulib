@@ -69,6 +69,7 @@ namespace lulib { namespace network { namespace http {
 		template<typename T, typename C>
 		self_type& operator=(basic_client<T,C> &client) {
 			client.read(*this);
+			return *this;
 		}
 
 

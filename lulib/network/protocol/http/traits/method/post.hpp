@@ -13,8 +13,8 @@ namespace lulib { namespace network { namespace http { namespace method {
 	struct POST<char> {
 		// CharTraits
 		typedef lulib::char_traits<char> char_traits;
-		typedef typename char_traits::char_type char_type;
-		typedef typename char_traits::string_type string_type;
+		typedef char_traits::char_type char_type;
+		typedef char_traits::string_type string_type;
 
 		// RequestからGETリクエストを作成し、Buffer(boost::asio::streambuf)に与える
 		template<typename Request, typename Buffer>

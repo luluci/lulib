@@ -1,6 +1,7 @@
 #pragma once
 #pragma warning(disable : 4819)
 
+#include <boost/asio/write.hpp>
 #include <lulib/network/detail/error_code.hpp>
 
 namespace lulib { namespace network { namespace detail {

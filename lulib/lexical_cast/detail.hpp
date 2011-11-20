@@ -117,14 +117,12 @@ namespace lulib {
 
 		// 数値型を返す
 		// 変換失敗時には例外を投げる
-		template<
-			typename As, typename Iterator,
-			typename std::enable_if< !is_nesting_value_type<
-				typename result<As>::type
-			>::value, int >::type = 0
-		>
+		template<typename As, typename Iterator>
 		typename result<As>::type
-		cast_impl(Iterator it, Iterator end) {
+		cast_impl(
+			Iterator it, Iterator end,
+			typename std::enable_if<!is_nesting_value_type<typename result<As>::type>::value>::type* = 0
+		) {
 			typedef typename result<As>::type result_type;
 			static  rule_traits<As,Iterator> rule;
 			static  qi::blank_type skipper;
@@ -135,14 +133,12 @@ namespace lulib {
 		}
 		// ユーザ定義型を返す
 		// エラーハンドリングはresult_typeに任せる
-		template<
-			typename As, typename Iterator,
-			typename std::enable_if< is_nesting_value_type<
-				typename result<As>::type
-			>::value, int >::type = 0
-		>
+		template<typename As, typename Iterator>
 		typename result<As>::type
-		cast_impl(Iterator it, Iterator end) {
+		cast_impl(
+			Iterator it, Iterator end,
+			typename std::enable_if<is_nesting_value_type<typename result<As>::type>::value>::type* = 0
+		) {
 			typedef typename result<As>::type result_type;
 			typedef typename value<result_type>::type value_type;
 			static  rule_traits<As,Iterator> rule;

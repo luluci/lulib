@@ -7,6 +7,7 @@
 
 #include <lulib/network/uri.hpp>
 #include <lulib/network/scheme.hpp>
+#include <lulib/network/protocol/http/basic_client_fwd.hpp>
 #include <lulib/network/protocol/http/basic_header.hpp>
 #include <lulib/network/protocol/http/basic_query.hpp>
 #include <lulib/network/protocol/http/version.hpp>
@@ -30,14 +31,14 @@ namespace lulib { namespace network { namespace http {
 			// buffer
 			typedef boost::asio::streambuf buffer_type;
 
+			typedef basic_scheme<Char> scheme;
+			typedef typename scheme::enum_t scheme_type;
+
 		private:
 			// HeaderContainer
 			typedef typename detail::header_container<Char>::type header_container;
 			// QueryContainer
 			typedef typename detail::query_container<Char>::type query_container;
-
-			typedef basic_scheme<Char> scheme;
-			typedef typename scheme::enum_t scheme_type;
 
 		public:
 			template<typename URL>
@@ -112,9 +113,9 @@ namespace lulib { namespace network { namespace http {
 			std::size_t          major_ver() const { return major_ver_; }
 			std::size_t          minor_ver() const { return minor_ver_; }
 
-		private:
-			template<typename P, typename C> friend class basic_client;
+			template<typename T, typename C> friend class lulib::network::http::basic_client;
 
+		private:
 			buffer_type buffer_;  // request buffer
 
 			string_type scheme_name_;  // スキーム
