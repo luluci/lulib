@@ -1,4 +1,3 @@
-#pragma warning(disable : 4819)
 
 #include <iostream>
 #include <type_traits>

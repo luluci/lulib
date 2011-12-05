@@ -11,7 +11,6 @@
 #include <boost/mpl/remove.hpp>
 #include <boost/mpl/apply.hpp>
 #include <boost/mpl/unpack_args.hpp>
-#include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/equal_to.hpp>
 #include <boost/mpl/not.hpp>
 #include <boost/mpl/identity.hpp>
@@ -20,6 +19,8 @@
 #include <boost/preprocessor/repetition/enum_params_with_a_default.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/preprocessor/selection/max.hpp>
+
+#include <lulib/mpl/placeholders.hpp>
 
 // enable_conditionが受け取るconditionの上限数
 #ifndef LULIB_ENABLE_CONDITION_MAX_CONDITION_SIZE
@@ -196,9 +197,6 @@ namespace lulib {
 		};
 
 	}// namespace lulib::enable_condition_detail
-
-	// using placeholders
-	using namespace boost::mpl::placeholders;
 
 	// make lulib::enable_condition
 #	define MAKE_LULIB_ENABLE_CONDITION(name, policy)						\

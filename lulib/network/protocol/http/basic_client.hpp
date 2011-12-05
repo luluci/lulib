@@ -31,8 +31,8 @@ namespace lulib { namespace network { namespace http {
 
 	public:
 		// CharTraits
-		typedef lulib::char_traits<Char> char_traits;
-		typedef typename char_traits::char_type char_type;
+		typedef lulib::char_traits<Char>          char_traits;
+		typedef typename char_traits::char_type   char_type;
 		typedef typename char_traits::string_type string_type;
 
 		typedef boost::asio::io_service      io_service;      // io_service
@@ -53,7 +53,7 @@ namespace lulib { namespace network { namespace http {
 		typedef typename resolver::query            query;
 		typedef typename resolver::iterator         endpoint_iterator;
 		// SSL
-		typedef ssl<Transport> ssl_traits;
+		typedef ssl<Transport>               ssl_traits;
 		typedef typename ssl_traits::context context;
 		typedef typename ssl_traits::socket  ssl_socket_type;
 

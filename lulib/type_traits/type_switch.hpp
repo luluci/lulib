@@ -16,11 +16,12 @@
 #include <boost/mpl/begin_end.hpp>
 #include <boost/mpl/deref.hpp>
 #include <boost/mpl/next_prior.hpp>
-#include <boost/mpl/placeholders.hpp>
 
 #include <boost/preprocessor/repetition/enum_params_with_a_default.hpp>
 #include <boost/preprocessor/repetition/enum_params.hpp>
 #include <boost/preprocessor/selection/max.hpp>
+
+#include <lulib/mpl/placeholders.hpp>
 
 // enable_conditionが受け取るconditionの上限数
 #ifndef LULIB_TYPE_SWITCH_MAX_CONDITION_SIZE
@@ -130,9 +131,6 @@ namespace lulib {
 		};
 
 	}// namespace lulib::type_switch_detail
-
-	// using placeholders
-	using namespace boost::mpl::placeholders;
 
 	template<
 		BOOST_PP_ENUM_PARAMS_WITH_A_DEFAULT(
