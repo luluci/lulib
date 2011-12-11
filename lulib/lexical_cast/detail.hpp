@@ -41,7 +41,7 @@ namespace lulib {
 		};
 
 		// ネスト型としてresult_typeを持っているかをチェックするメタ関数を作成
-		LULIB_IS_NESTING_TYPE(result_type);
+		LULIB_GENERATE_IS_NESTING_TYPE(result_type);
 		// Asに対応した返り値型を設定
 		template<typename As, typename Enabler = void> struct result;
 		// result_typeを持っている型なら

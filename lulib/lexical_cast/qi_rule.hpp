@@ -14,7 +14,7 @@ namespace lulib {
 		namespace qi = boost::spirit::qi;
 
 		// ネスト型としてvalue_typeを持っているかをチェックするメタ関数を作成
-		LULIB_IS_NESTING_TYPE(value_type);
+		LULIB_GENERATE_IS_NESTING_TYPE(value_type);
 
 		// Resultに対応した数値型を設定
 		template<typename Result, typename Enabler = void> struct value;
